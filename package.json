@@ -1,0 +1,23 @@
+{
+  "name": "mastercard-api-core",
+  "version": "1.0.0",
+  "description": "Core functionality for MasterCard API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@ldntools.labs.mastercard.com:open-api/sdk-core-nodejs.git"
+  },
+  "keywords": [
+    "MasterCard",
+    "API"
+  ],
+  "author": "Eamon Doyle <eamon.doyle@mastercard.com> (https://developer.mastercard.com)",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^2.4.5",
+    "should": "^8.2.2"
+  }
+}
