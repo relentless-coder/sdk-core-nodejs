@@ -48,6 +48,22 @@ var authentication = null;
 var initialized = false;
 
 /**
+ * Production URL
+ *
+ * @type {String}
+ * @default Constants.API_BASE_PRODUCTION_URL value
+ */
+MasterCardAPI.API_BASE_PRODUCTION_URL = constants.API_BASE_PRODUCTION_URL;
+
+/**
+ * Sandbox URL
+ *
+ * @type {String}
+ * @default Constants.API_BASE_SANDBOX_URL value
+ */
+MasterCardAPI.API_BASE_SANDBOX_URL = constants.API_BASE_SANDBOX_URL;
+
+/**
  * Initialize the Core MasterCard API SDK
  *
  * @param opts
@@ -190,11 +206,11 @@ function areAPIKeysSet(callback) {
  * @return {Object} Returns a URI object neeeded for a HTTP request
  */
 function getURI(path, action, params) {
-    var uri = constants.API_BASE_PRODUCTION_URL
+    var uri = MasterCardAPI.API_BASE_PRODUCTION_URL
 
     // Check if a sandbox is true and update the API endpoint accordingly
     if (sandbox) {
-        uri = constants.API_BASE_SANDBOX_URL;
+        uri = MasterCardAPI.API_BASE_SANDBOX_URL;
     }
 
     // Modify URI to point to the correct API path
