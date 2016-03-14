@@ -34,7 +34,7 @@
 var MasterCardAPI = {};
 
 // Imports
-var masterCardError = require('./lib/error');
+var mastercardError = require('./lib/error');
 var constants = require('./lib/constants');
 var oauth = require("./lib/security/oauth/oauth");
 var utils = require("./lib/utils");
@@ -68,7 +68,7 @@ MasterCardAPI.API_BASE_SANDBOX_URL = constants.API_BASE_SANDBOX_URL;
  *
  * @param opts
  *  {Boolean} sandbox - true (use sandbox), false (use production)
- *  {Boolean} authentication - authetnication object e.g. MasterCardAPI.OAuth
+ *  {Boolean} authentication - authentication object e.g. MasterCardAPI.OAuth
  */
 MasterCardAPI.init = function (opts) {
     if (utils.isSet(opts.sandbox)) {
@@ -88,7 +88,6 @@ MasterCardAPI.init = function (opts) {
 /**
  * Function to execute an API call.
  *
- * @method execute
  * @param {Object} opts
  *      {String} path - The path for the API
  *      {String} action - The type of action being invoked on the domain object
@@ -96,99 +95,105 @@ MasterCardAPI.init = function (opts) {
  * @param {Function} callback - A callback function to handle an success/error responses from the API
  */
 MasterCardAPI.execute = function (opts, callback) {
-    if (!initialized) {
-        callback(new masterCardError.API('MasterCardAPI.init(opts) must be called', {error : {message: 'MasterCardAPI.init(opts) must be called' }}), null);
-        return;
-    }
 
-    var path = opts.path,
-        action = opts.action,
-        params = opts.params;
+    try {
+        // Check SDK has been correctly initialized
+        _checkState();
 
-    // Validate that the API keys are set
-    if (!areAPIKeysSet(callback)) {
-        return;
-    }
+        var path = opts.path,
+            action = opts.action,
+            params = opts.params;
 
-    var uri, httpMethod;
+        var uri, httpMethod;
 
-    uri = getURI(path, action, params);
-    httpMethod = getHttpMethod(action);
+        uri = _getURI(path, action, params);
+        httpMethod = _getHttpMethod(action);
 
-    var body = JSON.stringify(params);
-    var authHeader = authentication.sign(uri, httpMethod, body);
+        var body = JSON.stringify(params);
+        var authHeader = authentication.sign(uri, httpMethod, body);
 
-    var requestOptions = getRequestOptions(httpMethod, uri, authHeader),
-        protocol = http;
+        var requestOptions = _getRequestOptions(httpMethod, uri, authHeader),
+            protocol = http;
 
-    if (uri.protocol === "https:") {
-        protocol = https;
-    }
-
-    // Exec async API HTTP request
-    var httpRequest = protocol.request(requestOptions, function (httpResponse) {
-        var httpResponseData = "";
-
-        httpResponse.setEncoding('utf8');
-
-        // Handle successful response
-        httpResponse.on('data', function (data) {
-            httpResponseData += data;
-        });
-
-        httpResponse.on('end', function () {
-            var jsonResponse = JSON.parse(httpResponseData);
-
-            if (!utils.isSet(jsonResponse.error)) {
-                callback(null, jsonResponse);
-            } else {
-                callback(new masterCardError.API('Error executing API call', jsonResponse), null);
-            }
-        });
-    }).on('error', function (errorResponse) {
-
-        // Catch our timeout error thrown below
-        if (errorResponse.code === "ECONNRESET") {
-            callback(new Error('The API request has timed out'), null);
+        if (uri.protocol === "https:") {
+            protocol = https;
         }
 
-        // Return error from API call
-        callback(new masterCardError.API('Error executing API call', errorResponse), null);
-    }).on('socket', function (socket) {
-        // Set timeout on the HTTP request
-        socket.setTimeout(30000);
-        socket.on('timeout', function () {
-            // Killing the request which throws an Error and is caught above in the error block
-            httpRequest.abort();
-        });
-    });
+        // Exec async API HTTP request
+        var httpRequest = protocol.request(requestOptions, function (httpResponse) {
+            var httpResponseData = "";
 
-    // If POST request, then write to the body of the request
-    if (requestOptions.method === "POST" || requestOptions.method === "PUT") {
-        httpRequest.write(body);
+            httpResponse.setEncoding('utf8');
+
+            // Handle successful response
+            httpResponse.on('data', function (data) {
+                httpResponseData += data;
+            });
+
+            httpResponse.on('end', function () {
+                var jsonResponse = JSON.parse(httpResponseData);
+
+                if (!utils.isSet(jsonResponse.error)) {
+                    callback(null, jsonResponse);
+                } else {
+                    throw new mastercardError.APIError('Error executing API call', jsonResponse);
+                }
+            });
+
+        }).on('error', function (errorResponse) {
+
+            // Catch our timeout error thrown below
+            if (errorResponse.code === "ECONNRESET") {
+                throw new mastercardError.APIError('The API request has timed out');
+            }
+
+            // Return error from API call
+            throw new mastercardError.APIError('Error executing API call', errorResponse);
+
+        }).on('socket', function (socket) {
+
+            // Set timeout on the HTTP request
+            socket.setTimeout(30000);
+            socket.on('timeout', function () {
+                // Killing the request which throws an Error and is caught above in the error block
+                httpRequest.abort();
+            });
+
+        });
+
+        // If POST request, then write to the body of the request
+        if (requestOptions.method === "POST" || requestOptions.method === "PUT") {
+            httpRequest.write(body);
+        }
+
+        httpRequest.end();
+    }
+    catch(error) {
+        callback(error, null);
     }
 
-    httpRequest.end();
 };
 
 /**
- * Function to check whether the user's API keys are set or not.
+ * Function to check if the SDK has been initialized correctly.
  *
- * @method areAPIKeysSet
  * @private
- * @param {Object} auth An object containing the public & private API keys
- * @param {Function} callback A callback function to handle an errors
- * @return {Boolean} Returns true if both public & private API keys are set
+ * @return {Boolean} Returns true if both Consumer Key and Authentication are set
+ * @throws mastercardError.APIError
  */
-function areAPIKeysSet(callback) {
+function _checkState() {
+    // Check if initialized
+    if (!initialized) {
+        throw new mastercardError.APIError('MasterCardAPI.init(opts) must be called');
+    }
+
+
     if (!utils.isSet(authentication)) {
-        callback(new masterCardError.API('Missing API Key - Simplify.PRIVATE_KEY'), null);
-        return false;
+        throw new mastercardError.APIError('Authentication must be set');
     }
 
     if (!utils.isSet(authentication.consumerKey)) {
-        callback(new masterCardError.API('Missing API Key - Simplify.PUBLIC_KEY'), null);
-        return false;
+        throw new mastercardError.APIError('Consumer Key is not set');
     }
 
     return true;
@@ -197,16 +202,15 @@ function areAPIKeysSet(callback) {
 /**
  * Function to build up the URI endpoint to use in the request.
  *
- * @method getURI
  * @private
- *
  * @param {String} path - The path for the API
  * @param {String} action - The type of action being invoked on the domain object
- * @param {Object} params - The request paramaters
- * @return {Object} Returns a URI object neeeded for a HTTP request
+ * @param {Object} params - The request parameters
+ *
+ * @return {Object} Returns a URI object needed for a HTTP request
  */
-function getURI(path, action, params) {
-    var uri = MasterCardAPI.API_BASE_PRODUCTION_URL
+function _getURI(path, action, params) {
+    var uri = MasterCardAPI.API_BASE_PRODUCTION_URL;
 
     // Check if a sandbox is true and update the API endpoint accordingly
     if (sandbox) {
@@ -247,7 +251,7 @@ function getURI(path, action, params) {
 /**
  * Append map as parameters to URL
  *
- * @param {Map} map
+ * @param {Object} map
  * @param {String} uri - the current uri
  * @returns {String} uri
  */
@@ -286,13 +290,14 @@ var _appendQueryString = function(uri, key, value) {
 /**
  * Function to construct the options map needed for the API request.
  *
+ * @private
  * @param {String} httpMethod - The type of HTTP request being made e.g. 'POST'
  * @param {Object} uri - An object containing the properties of a URI
  * @param {String} authHeader - String containing Authorization header data
  *
- * @returns {{host: (string|string), port: *, path: *, method: *, headers: {Accept: string, Authorization: *, Content-Type: string, User-Agent: string}}}
+ * @returns request options map
  */
-function getRequestOptions(httpMethod, uri, authHeader) {
+function _getRequestOptions(httpMethod, uri, authHeader) {
 
     return {
         host: uri.hostname,
@@ -303,18 +308,20 @@ function getRequestOptions(httpMethod, uri, authHeader) {
             "Accept": "application/json",
             "Authorization": authHeader,
             "Content-Type": "application/json",
-            "User-Agent": "NodeJS-SDK"
+            "User-Agent": "NodeJS-SDK/" + constants.VERSION
         }
     };
+
 }
 
 /**
  * Function to choose the appropriate HTTP method based on the API action.
  *
+ * @private
  * @param {String} action - The type of action being invoked on the domain object
  * @return {String} Returns a HTTP request type e.g. 'POST'
  */
-function getHttpMethod(action) {
+function _getHttpMethod(action) {
     var httpMethod;
 
     if (action === "create") {
@@ -328,6 +335,9 @@ function getHttpMethod(action) {
     }
     else if (action === "read" || action === "list") {
         httpMethod = "GET";
+    }
+    else {
+        throw new mastercardError.APIError("Unknown action [" + action + "]");
     }
 
     return httpMethod;
