@@ -175,6 +175,16 @@ MasterCardAPI.execute = function (opts, callback) {
 };
 
 /**
+ * Function to check whether a value/object is 'undefined', null, false or empty.
+ * Expose for use in SDKs
+ *
+ * @param {Object} value - Object to check
+ * @return {Boolean} Returns true if object's type is 'undefined'
+ */
+MasterCardAPI.isSet = function (value) {
+    return utils.isSet(value);
+};
+/**
  * Function to check if the SDK has been initialized correctly.
  *
  * @private
