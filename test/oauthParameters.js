@@ -1,5 +1,9 @@
 var OAuthParameters = require('../lib/security/oauth/oauthParameters');
+
+// Imports for Test
 var should = require('should');
+
+// Variables for Test
 var oauth = new OAuthParameters("mockConsumerKey");
 
 describe('OAuthParameters', function() {
@@ -9,7 +13,7 @@ describe('OAuthParameters', function() {
         oauth.nonce.should.be.a.String;
         oauth.signatureMethod.should.equal('RSA-SHA1');
         oauth.oauthVersion.should.equal('1.0');
-        oauth.bodyHash.should.equal('');
+        should.not.exist(oauth.bodyHash);
         oauth.signature.should.equal('');
     });
 
@@ -57,7 +61,31 @@ describe('OAuthParameters', function() {
             oauth_body_hash: "qZk+NkcGgWq6PiVxeFDCbJzQ2J0="
         };
 
-        var ret = oauth.generateParametersHash("abc");
+        var ret = oauth.generateParametersHash();
+
+        hashMap.should.containDeep(ret);
+    });
+
+    it('test body hash with no body', function () {
+        var oauth = new OAuthParameters("mockConsumerKey");
+        oauth.generateBodyHash();
+
+        should.not.exist(oauth.bodyHash);
+    });
+
+    it('test parameter hash with no body', function () {
+        var oauth = new OAuthParameters("mockConsumerKey");
+        oauth.generateBodyHash();
+
+        var hashMap = {
+            oauth_consumer_key: "mockConsumerKey",
+            oauth_timestamp: oauth.timeStamp.toString(),
+            oauth_nonce: oauth.nonce,
+            oauth_signature_method: 'RSA-SHA1',
+            oauth_version: '1.0'
+        };
+
+        var ret = oauth.generateParametersHash();
 
         hashMap.should.containDeep(ret);
     });

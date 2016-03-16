@@ -17,8 +17,13 @@
   "author": "Eamon Doyle <eamon.doyle@mastercard.com> (https://developer.mastercard.com)",
   "license": "ISC",
   "devDependencies": {
+    "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
-    "should": "^8.2.2"
+    "mock-require": "^1.2.1",
+    "mockery": "^1.4.1",
+    "rewire": "^2.5.1",
+    "should": "^8.2.2",
+    "sinon": "^1.17.3"
   },
   "dependencies": {
     "node-forge": "^0.6.39"
