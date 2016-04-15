@@ -102,7 +102,8 @@ MasterCardAPI.execute = function (opts, callback) {
 
         var path = opts.path,
             action = opts.action,
-            params = opts.params;
+            params = opts.params,
+            headerParams = utils.subMap(opts.param, opts.headerList);
 
         var uri, httpMethod;
 
@@ -229,6 +230,9 @@ function _getURI(path, action, params) {
 
     // Modify URI to point to the correct API path
     uri += path;
+    
+    // replace the path parameters
+    uri = _replacePathParameters(path, params);
 
     // Handle Id
     switch (action) {
@@ -256,7 +260,41 @@ function _getURI(path, action, params) {
 
     // Use node js 'url' module to create URI object
     return url.parse(uri);
-}
+};
+
+
+
+var _replacePathParameters = function(path, map)
+{
+    var pathParameterRegex = /(\{.*?\})/g;
+    var pathToReplace = path;
+    
+    var match = pathParameterRegex.exec(path);
+    while (match != null) {
+
+        // get the first matching group
+        var group = match[0];
+        // extract the key value by removing {}
+        var key = group.slice(1, -1);
+
+        if (key in map) {
+            // replace {user_id} with id in the map
+            pathToReplace = pathToReplace.replace(group, map[key]);
+
+            // remove the replace value from the map
+            delete map[key];
+        } else {
+            // something went wrong.. p45
+            throw new mastercardError.APIError("Required path parameter: '"+key+"' not found on input map");
+        }
+
+        // iterate to next
+        match = pathParameterRegex.exec(path);
+    }
+   
+    return pathToReplace;
+
+};
 
 /**
  * Append map as parameters to URL
@@ -304,12 +342,13 @@ var _appendQueryString = function(uri, key, value) {
  * @param {String} httpMethod - The type of HTTP request being made e.g. 'POST'
  * @param {Object} uri - An object containing the properties of a URI
  * @param {String} authHeader - String containing Authorization header data
+ * @param {Object} headerParam - An map containing the extra header parames which needs to be added
  *
  * @returns request options map
  */
-function _getRequestOptions(httpMethod, uri, authHeader) {
+function _getRequestOptions(httpMethod, uri, authHeader, headerParam) {
 
-    return {
+    var returnObj = {
         host: uri.hostname,
         port: uri.port,
         path: uri.path,
@@ -321,6 +360,14 @@ function _getRequestOptions(httpMethod, uri, authHeader) {
             "User-Agent": "NodeJS-SDK/" + constants.VERSION
         }
     };
+    
+    // need to add the additional headers
+    for (var key in headerParam) {
+        returnObj.headers[key] = headerParam[key];
+    }
+    
+    return returnObj
+    
 
 }
 
@@ -354,6 +401,24 @@ function _getHttpMethod(action) {
 }
 
 MasterCardAPI.OAuth = oauth;
+
+
+//arizzini: if you need to expose private function only during unit testing use this
+if (typeof global.it === 'function') {
+    // START EXPOSE PRIVATE FUNCTION FOR TESTING
+    
+    MasterCardAPI.getUri = function(path, action, params) {
+        return  _getURI(path, action, params);
+    };
+    
+    MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam) {
+        return _getRequestOptions(httpMethod, uri, authHeader, headerParam);
+    };
+
+    // END EXPOSE PRIVATE FUNCTION FOR TESTING
+}
+
+
 
 // Export our object for use.
 module.exports = MasterCardAPI;

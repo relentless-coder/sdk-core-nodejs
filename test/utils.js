@@ -36,5 +36,21 @@ describe('utils', function() {
     it('"undefined" string should return false', function () {
         utils.isSet("undefined").should.equal(true);
     });
+    
+    
+    it('subMap should return a submap from list', function () {
+        
+        var params = new Array();
+        params['a'] = 1;
+        params['b'] = 2;
+        params['c'] = 3;
+        params['d'] = 4;
+        
+        var list = ['a', 'c'];
+        
+        var subMap = utils.subMap(params, list);
+        subMap['a'].should.equal(1);
+        subMap['c'].should.equal(3);
+    });
 
 });
