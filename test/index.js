@@ -42,8 +42,8 @@ describe('MasterCardAPI', function() {
        var params = new Array();
        params['version'] = "1";
        params['user_id'] = "333";
-       var replacedUri = MasterCardAPI.getUri("http://api.mastercard.com/masterpass/v{version}/user/{user_id}/moneysend","create", params);
-       replacedUri.href.should.equal("http://api.mastercard.com/masterpass/v1/user/333/moneysend?Format=JSON");
+       var replacedUri = MasterCardAPI.getUri("/masterpass/v{version}/user/{user_id}/moneysend","create", params);
+       replacedUri.href.should.equal("https://sandbox.api.mastercard.com/masterpass/v1/user/333/moneysend?Format=JSON");
        params.length.should.equal(0);
     });
     
@@ -53,8 +53,8 @@ describe('MasterCardAPI', function() {
        params['version'] = "1";
        params['user_id'] = "333";
        params['other'] = "aaa";
-       var replacedUri = MasterCardAPI.getUri("http://api.mastercard.com/masterpass/v{version}/user/{user_id}/{other}","create", params);
-       replacedUri.href.should.equal("http://api.mastercard.com/masterpass/v1/user/333/aaa?Format=JSON");
+       var replacedUri = MasterCardAPI.getUri("/masterpass/v{version}/user/{user_id}/{other}","create", params);
+       replacedUri.href.should.equal("https://sandbox.api.mastercard.com/masterpass/v1/user/333/aaa?Format=JSON");
        params.length.should.equal(0);
     });
     
@@ -66,7 +66,7 @@ describe('MasterCardAPI', function() {
        
        //httpMethod, uri, authHeader, headerParam
        var httpMethod = "GET";
-       var uri = "http://api.mastercard.com/masterpass/v1/user/333/aaa?Format=JSON";
+       var uri = "/masterpass/v1/user/333/aaa?Format=JSON";
        var authHeader = "blablablablablabla";
        
        

@@ -46,6 +46,7 @@ var url = require('url');
 var sandbox = false;
 var authentication = null;
 var initialized = false;
+var test = false;
 
 /**
  * Production URL
@@ -98,30 +99,37 @@ MasterCardAPI.execute = function (opts, callback) {
 
     try {
         // Check SDK has been correctly initialized
+        
+        
         _checkState();
 
-        var path = opts.path,
-            action = opts.action,
-            params = opts.params,
-            headerParams = utils.subMap(opts.param, opts.headerList);
-
+        var path = opts.path;
+        var action = opts.action;
+        var params = opts.params;
+        var headerParams = utils.subMap(params, opts.headerList);
+            
         var uri, httpMethod;
 
         uri = _getURI(path, action, params);
+        
         httpMethod = _getHttpMethod(action);
 
         var body = JSON.stringify(params);
-        var authHeader = authentication.sign(uri, httpMethod, body);
+        var authHeader = "";
+        if (authentication !== null) {
+            authentication.sign(uri, httpMethod, body);
+        }
 
-        var requestOptions = _getRequestOptions(httpMethod, uri, authHeader),
-            protocol = http;
-
+        var requestOptions = _getRequestOptions(httpMethod, uri, authHeader, headerParams);
+        
+        protocol = http;
         if (uri.protocol === "https:") {
             protocol = https;
         }
 
         // Exec async API HTTP request
         var httpRequest = protocol.request(requestOptions, function (httpResponse) {
+            
             var httpResponseData = "";
 
             httpResponse.setEncoding('utf8');
@@ -132,7 +140,12 @@ MasterCardAPI.execute = function (opts, callback) {
             });
 
             httpResponse.on('end', function () {
-                var jsonResponse = JSON.parse(httpResponseData);
+                
+                try {
+                     var jsonResponse = JSON.parse(httpResponseData);
+                } catch (e) {
+                    throw new mastercardError.APIError('Error executing API call','');
+                }
 
                 if (!utils.isSet(jsonResponse.error)) {
                     callback(null, jsonResponse);
@@ -140,9 +153,10 @@ MasterCardAPI.execute = function (opts, callback) {
                     throw new mastercardError.APIError('Error executing API call', jsonResponse);
                 }
             });
+            
 
         }).on('error', function (errorResponse) {
-
+            
             // Catch our timeout error thrown below
             if (errorResponse.code === "ECONNRESET") {
                 throw new mastercardError.APIError('The API request has timed out');
@@ -197,14 +211,16 @@ function _checkState() {
     if (!initialized) {
         throw new mastercardError.APIError('MasterCardAPI.init(opts) must be called');
     }
+     
+    if (test === false)
+    {
+        if (!utils.isSet(authentication)) {
+            throw new mastercardError.APIError('Authentication must be set');
+        }
 
-
-    if (!utils.isSet(authentication)) {
-        throw new mastercardError.APIError('Authentication must be set');
-    }
-
-    if (!utils.isSet(authentication.consumerKey)) {
-        throw new mastercardError.APIError('Consumer Key is not set');
+        if (!utils.isSet(authentication.consumerKey)) {
+            throw new mastercardError.APIError('Consumer Key is not set');
+        }
     }
 
     return true;
@@ -229,11 +245,11 @@ function _getURI(path, action, params) {
     }
 
     // Modify URI to point to the correct API path
-    uri += path;
+    uri = uri + path;
     
     // replace the path parameters
-    uri = _replacePathParameters(path, params);
-
+    uri = _replacePathParameters(uri, params);
+    
     // Handle Id
     switch (action) {
         case "read":
@@ -257,7 +273,7 @@ function _getURI(path, action, params) {
 
     // Add Format=JSON
     uri = _appendMapToQueryString(uri, { Format: "JSON" });
-
+    
     // Use node js 'url' module to create URI object
     return url.parse(uri);
 };
@@ -414,6 +430,18 @@ if (typeof global.it === 'function') {
     MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam) {
         return _getRequestOptions(httpMethod, uri, authHeader, headerParam);
     };
+    
+    MasterCardAPI.testInit = function (opts) {
+
+        test = true;
+        sandbox = true;
+        initialized = true;
+        MasterCardAPI.API_BASE_SANDBOX_URL = "http://localhost:8080";
+
+        
+    };
+
+
 
     // END EXPOSE PRIVATE FUNCTION FOR TESTING
 }
