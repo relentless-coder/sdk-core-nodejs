@@ -46,6 +46,7 @@ var url = require('url');
 var sandbox = false;
 var authentication = null;
 var initialized = false;
+var test = false;
 
 /**
  * Production URL
@@ -98,29 +99,37 @@ MasterCardAPI.execute = function (opts, callback) {
 
     try {
         // Check SDK has been correctly initialized
+        
+        
         _checkState();
 
-        var path = opts.path,
-            action = opts.action,
-            params = opts.params;
-
+        var path = opts.path;
+        var action = opts.action;
+        var params = opts.params;
+        var headerParams = utils.subMap(params, opts.headerList);
+            
         var uri, httpMethod;
 
         uri = _getURI(path, action, params);
+        
         httpMethod = _getHttpMethod(action);
 
         var body = JSON.stringify(params);
-        var authHeader = authentication.sign(uri, httpMethod, body);
+        var authHeader = "";
+        if (authentication !== null) {
+            authentication.sign(uri, httpMethod, body);
+        }
 
-        var requestOptions = _getRequestOptions(httpMethod, uri, authHeader),
-            protocol = http;
-
+        var requestOptions = _getRequestOptions(httpMethod, uri, authHeader, headerParams);
+        
+        protocol = http;
         if (uri.protocol === "https:") {
             protocol = https;
         }
 
         // Exec async API HTTP request
         var httpRequest = protocol.request(requestOptions, function (httpResponse) {
+            
             var httpResponseData = "";
 
             httpResponse.setEncoding('utf8');
@@ -131,7 +140,12 @@ MasterCardAPI.execute = function (opts, callback) {
             });
 
             httpResponse.on('end', function () {
-                var jsonResponse = JSON.parse(httpResponseData);
+                
+                try {
+                     var jsonResponse = JSON.parse(httpResponseData);
+                } catch (e) {
+                    throw new mastercardError.APIError('Error executing API call','');
+                }
 
                 if (!utils.isSet(jsonResponse.error)) {
                     callback(null, jsonResponse);
@@ -139,9 +153,10 @@ MasterCardAPI.execute = function (opts, callback) {
                     throw new mastercardError.APIError('Error executing API call', jsonResponse);
                 }
             });
+            
 
         }).on('error', function (errorResponse) {
-
+            
             // Catch our timeout error thrown below
             if (errorResponse.code === "ECONNRESET") {
                 throw new mastercardError.APIError('The API request has timed out');
@@ -196,14 +211,16 @@ function _checkState() {
     if (!initialized) {
         throw new mastercardError.APIError('MasterCardAPI.init(opts) must be called');
     }
+     
+    if (test === false)
+    {
+        if (!utils.isSet(authentication)) {
+            throw new mastercardError.APIError('Authentication must be set');
+        }
 
-
-    if (!utils.isSet(authentication)) {
-        throw new mastercardError.APIError('Authentication must be set');
-    }
-
-    if (!utils.isSet(authentication.consumerKey)) {
-        throw new mastercardError.APIError('Consumer Key is not set');
+        if (!utils.isSet(authentication.consumerKey)) {
+            throw new mastercardError.APIError('Consumer Key is not set');
+        }
     }
 
     return true;
@@ -228,8 +245,11 @@ function _getURI(path, action, params) {
     }
 
     // Modify URI to point to the correct API path
-    uri += path;
-
+    uri = uri + path;
+    
+    // replace the path parameters
+    uri = _replacePathParameters(uri, params);
+    
     // Handle Id
     switch (action) {
         case "read":
@@ -253,10 +273,44 @@ function _getURI(path, action, params) {
 
     // Add Format=JSON
     uri = _appendMapToQueryString(uri, { Format: "JSON" });
-
+    
     // Use node js 'url' module to create URI object
     return url.parse(uri);
-}
+};
+
+
+
+var _replacePathParameters = function(path, map)
+{
+    var pathParameterRegex = /(\{.*?\})/g;
+    var pathToReplace = path;
+    
+    var match = pathParameterRegex.exec(path);
+    while (match != null) {
+
+        // get the first matching group
+        var group = match[0];
+        // extract the key value by removing {}
+        var key = group.slice(1, -1);
+
+        if (key in map) {
+            // replace {user_id} with id in the map
+            pathToReplace = pathToReplace.replace(group, map[key]);
+
+            // remove the replace value from the map
+            delete map[key];
+        } else {
+            // something went wrong.. p45
+            throw new mastercardError.APIError("Required path parameter: '"+key+"' not found on input map");
+        }
+
+        // iterate to next
+        match = pathParameterRegex.exec(path);
+    }
+   
+    return pathToReplace;
+
+};
 
 /**
  * Append map as parameters to URL
@@ -304,12 +358,13 @@ var _appendQueryString = function(uri, key, value) {
  * @param {String} httpMethod - The type of HTTP request being made e.g. 'POST'
  * @param {Object} uri - An object containing the properties of a URI
  * @param {String} authHeader - String containing Authorization header data
+ * @param {Object} headerParam - An map containing the extra header parames which needs to be added
  *
  * @returns request options map
  */
-function _getRequestOptions(httpMethod, uri, authHeader) {
+function _getRequestOptions(httpMethod, uri, authHeader, headerParam) {
 
-    return {
+    var returnObj = {
         host: uri.hostname,
         port: uri.port,
         path: uri.path,
@@ -321,6 +376,14 @@ function _getRequestOptions(httpMethod, uri, authHeader) {
             "User-Agent": "NodeJS-SDK/" + constants.VERSION
         }
     };
+    
+    // need to add the additional headers
+    for (var key in headerParam) {
+        returnObj.headers[key] = headerParam[key];
+    }
+    
+    return returnObj
+    
 
 }
 
@@ -354,6 +417,36 @@ function _getHttpMethod(action) {
 }
 
 MasterCardAPI.OAuth = oauth;
+
+
+//arizzini: if you need to expose private function only during unit testing use this
+if (typeof global.it === 'function') {
+    // START EXPOSE PRIVATE FUNCTION FOR TESTING
+    
+    MasterCardAPI.getUri = function(path, action, params) {
+        return  _getURI(path, action, params);
+    };
+    
+    MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam) {
+        return _getRequestOptions(httpMethod, uri, authHeader, headerParam);
+    };
+    
+    MasterCardAPI.testInit = function (opts) {
+
+        test = true;
+        sandbox = true;
+        initialized = true;
+        MasterCardAPI.API_BASE_SANDBOX_URL = "http://localhost:8080";
+
+        
+    };
+
+
+
+    // END EXPOSE PRIVATE FUNCTION FOR TESTING
+}
+
+
 
 // Export our object for use.
 module.exports = MasterCardAPI;
