@@ -144,27 +144,27 @@ MasterCardAPI.execute = function (opts, callback) {
                 try {
                      var jsonResponse = JSON.parse(httpResponseData);
                 } catch (e) {
-                    throw new mastercardError.APIError('Error executing API call','');
+                    callback(new mastercardError.APIError('Error executing API call (1)', httpResponseData), null);
                 }
 
                 if (!utils.isSet(jsonResponse.error)) {
                     callback(null, jsonResponse);
                 } else {
-                    throw new mastercardError.APIError('Error executing API call', jsonResponse);
+                    callback(new mastercardError.APIError('Error executing API call (2)', jsonResponse), null)
                 }
             });
-            
-
         }).on('error', function (errorResponse) {
             
             // Catch our timeout error thrown below
             if (errorResponse.code === "ECONNRESET") {
-                throw new mastercardError.APIError('The API request has timed out');
+                callback(new mastercardError.APIError('The API request has timed out', errorResponse), null);
+            } else if (errorResponse.code === "ECONNREFUSED") {
+                callback(new mastercardError.APIError('The API server refused the connection', errorResponse), null);
+            } else {
+                callback(new mastercardError.APIError('Error executing API call (1)', errorResponse), null);
             }
-
             // Return error from API call
-            throw new mastercardError.APIError('Error executing API call', errorResponse);
-
+            
         }).on('socket', function (socket) {
 
             // Set timeout on the HTTP request
@@ -173,8 +173,7 @@ MasterCardAPI.execute = function (opts, callback) {
                 // Killing the request which throws an Error and is caught above in the error block
                 httpRequest.abort();
             });
-
-        });
+        }); 
 
         // If POST request, then write to the body of the request
         if (requestOptions.method === "POST" || requestOptions.method === "PUT") {
@@ -183,8 +182,8 @@ MasterCardAPI.execute = function (opts, callback) {
 
         httpRequest.end();
     }
-    catch(error) {
-        callback(error, null);
+    catch(e) {
+        callback(e, null);
     }
 
 };
@@ -267,6 +266,7 @@ function _getURI(path, action, params) {
         case "read":
         case "list":
         case "delete":
+        case "query":
             uri = _appendMapToQueryString(uri, params);
             break;
     }
@@ -406,7 +406,7 @@ function _getHttpMethod(action) {
     else if (action === "update") {
         httpMethod = "PUT";
     }
-    else if (action === "read" || action === "list") {
+    else if (action === "read" || action === "list" || action === "query") {
         httpMethod = "GET";
     }
     else {

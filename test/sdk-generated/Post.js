@@ -44,6 +44,9 @@ var Post = {};
         if (action == "read") {
             return "/mock_crud_server/posts/{id}";
         }
+        if (action == "query") {
+            return "/mock_crud_server/posts/{id}";
+        }
         if (action == "update") {
             return "/mock_crud_server/posts/{id}";
         }
@@ -68,6 +71,9 @@ var Post = {};
             return [];
         }
         if (action == "read") {
+            return [];
+        }
+        if (action == "query") {
             return [];
         }
         if (action == "update") {
@@ -100,6 +106,23 @@ var Post = {};
             action: "list",
             path: _getResourcePath("list"),
             headerList: _getHeaderList("list"),
+            params: params
+        }, callback);
+    };
+    
+    
+    
+    
+    //test query
+    Post.query = function(params, callback) {
+        if (!MasterCardAPI.isSet(params)) {
+            params = {};
+        }
+
+        MasterCardAPI.execute({
+            action: "query",
+            path: _getResourcePath("query"),
+            headerList: _getHeaderList("query"),
             params: params
         }, callback);
     };

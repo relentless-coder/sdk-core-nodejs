@@ -46,6 +46,19 @@ describe('Post', function () {
         
     });
     
+    
+    it('test Action.query from Post--> 200', function (done) {
+        
+        Post.query({id: 1}, function (error, data) {
+                data.id.should.equal(1);
+                data.title.should.equal("My Title");
+                data.body.should.equal("some body text");
+                data.userId.should.equal(1);
+                done();
+        });
+        
+    });
+    
     it('test Action.read from Post--> 200', function (done) {
         
         Post.read("1", {}, function (error, data) {
@@ -54,6 +67,15 @@ describe('Post', function () {
                 data.body.should.equal("some body text");
                 data.userId.should.equal(1);
                 done();
+        });
+        
+    });
+    
+    it('test Action.read from Post--> 500', function (done) {
+        
+        Post.read("aaaa", {}, function (error, data) {
+            error.message.should.equal("Error executing API call (1)");
+            done();
         });
         
     });
