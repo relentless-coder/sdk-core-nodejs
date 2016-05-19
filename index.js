@@ -115,10 +115,7 @@ MasterCardAPI.execute = function (opts, callback) {
         httpMethod = _getHttpMethod(action);
 
         var body = JSON.stringify(params);
-        var authHeader = "";
-        if (authentication !== null) {
-            authentication.sign(uri, httpMethod, body);
-        }
+        var authHeader = authentication.sign(uri, httpMethod, body);
 
         var requestOptions = _getRequestOptions(httpMethod, uri, authHeader, headerParams);
         
@@ -140,28 +137,43 @@ MasterCardAPI.execute = function (opts, callback) {
             });
 
             httpResponse.on('end', function () {
-                
-                try {
-                     var jsonResponse = JSON.parse(httpResponseData);
-                } catch (e) {
-                    callback(new mastercardError.APIError('Error executing API call (1)', httpResponseData), null);
-                }
 
-                if (!utils.isSet(jsonResponse.error)) {
-                    callback(null, jsonResponse);
-                } else {
-                    callback(new mastercardError.APIError('Error executing API call (2)', jsonResponse), null)
+                var statusCode = httpResponse.statusCode
+
+                if (statusCode < 300) {
+                    try {
+                        var jsonResponse = JSON.parse(httpResponseData);
+                        callback(null, jsonResponse);
+                    }
+                    catch (e) {
+                        console.error("Error parsing json response. Status: " + statusCode)
+                        callback(new mastercardError.APIError('Error parsing JSON response', httpResponseData, 500), null);
+                    }
+                }
+                else {
+                    var error = httpResponseData;
+
+                    try {
+                        error = JSON.parse(httpResponseData);
+                    }
+                    catch (e) {
+                        console.error("Error parsing json response. Status: " + statusCode)
+                    }
+
+                    callback(new mastercardError.APIError('Error executing API call', error, statusCode), null);
                 }
             });
         }).on('error', function (errorResponse) {
-            
+
+            var errorStatusCode = errorResponse.statusCode
+
             // Catch our timeout error thrown below
             if (errorResponse.code === "ECONNRESET") {
-                callback(new mastercardError.APIError('The API request has timed out', errorResponse), null);
+                callback(new mastercardError.APIError('The API request has timed out', errorResponse, errorStatusCode), null);
             } else if (errorResponse.code === "ECONNREFUSED") {
-                callback(new mastercardError.APIError('The API server refused the connection', errorResponse), null);
+                callback(new mastercardError.APIError('The API server refused the connection', errorResponse, errorStatusCode), null);
             } else {
-                callback(new mastercardError.APIError('Error executing API call (1)', errorResponse), null);
+                callback(new mastercardError.APIError('Error executing API call', errorResponse, errorStatusCode), null);
             }
             // Return error from API call
             
@@ -208,17 +220,17 @@ MasterCardAPI.isSet = function (value) {
 function _checkState() {
     // Check if initialized
     if (!initialized) {
-        throw new mastercardError.APIError('MasterCardAPI.init(opts) must be called');
+        throw new mastercardError.SDKError('MasterCardAPI.init(opts) must be called');
     }
      
     if (test === false)
     {
         if (!utils.isSet(authentication)) {
-            throw new mastercardError.APIError('Authentication must be set');
+            throw new mastercardError.SDKError('Authentication must be set');
         }
 
         if (!utils.isSet(authentication.consumerKey)) {
-            throw new mastercardError.APIError('Consumer Key is not set');
+            throw new mastercardError.SDKError('Consumer Key is not set');
         }
     }
 
@@ -301,7 +313,7 @@ var _replacePathParameters = function(path, map)
             delete map[key];
         } else {
             // something went wrong.. p45
-            throw new mastercardError.APIError("Required path parameter: '"+key+"' not found on input map");
+            throw new mastercardError.SDKError("Required path parameter: '"+key+"' not found on input map");
         }
 
         // iterate to next
@@ -410,7 +422,7 @@ function _getHttpMethod(action) {
         httpMethod = "GET";
     }
     else {
-        throw new mastercardError.APIError("Unknown action [" + action + "]");
+        throw new mastercardError.SDKError("Unknown action [" + action + "]");
     }
 
     return httpMethod;

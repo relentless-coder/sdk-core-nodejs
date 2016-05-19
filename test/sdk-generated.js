@@ -74,7 +74,7 @@ describe('Post', function () {
     it('test Action.read from Post--> 500', function (done) {
         
         Post.read("aaaa", {}, function (error, data) {
-            error.message.should.equal("Error executing API call (1)");
+            error.message.should.equal("Error executing API call");
             done();
         });
         
