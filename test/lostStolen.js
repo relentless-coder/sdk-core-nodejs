@@ -60,9 +60,6 @@ describe('lostStolen', function() {
             params: request
         },
         function (error, data) {
-            console.log(error)
-            console.log(error.data)
-
             error.status.should.equal(400);
             done();
         });
