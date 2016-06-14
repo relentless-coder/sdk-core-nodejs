@@ -2,3 +2,4 @@
 /node_modules/
 /coverage/
 /nodejs-server/node_modules/
+.idea
