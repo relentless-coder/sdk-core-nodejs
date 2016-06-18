@@ -2,8 +2,8 @@
 var MasterCardAPI = require('../index');
 
 // variables for test
-var clientId = "gVaoFbo86jmTfOB4NUyGKaAchVEU8ZVPalHQRLTxeaf750b6!414b543630362f426b4f6636415a5973656c33735661383d";
-var p12Path = "./keystore/prod_key.p12";
+var clientId = "L5BsiPgaF-O3qA36znUATgQXwJB6MRoMSdhjd7wt50c97279!50596e52466e3966546d434b7354584c4975693238513d3d";
+var p12Path = "./keystore/mcapi_sandbox_key.p12";
 var alias = "test";
 var password = "password";
 
