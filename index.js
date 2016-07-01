@@ -106,18 +106,19 @@ MasterCardAPI.execute = function (opts, callback) {
         var path = opts.path;
         var action = opts.action;
         var params = opts.params;
+        var sdkVersion = opts.sdkVersion;
         var headerParams = utils.subMap(params, opts.headerList);
             
         var uri, httpMethod;
 
         uri = _getURI(path, action, params);
-        
+
         httpMethod = _getHttpMethod(action);
 
         var body = JSON.stringify(params);
         var authHeader = authentication.sign(uri, httpMethod, body);
 
-        var requestOptions = _getRequestOptions(httpMethod, uri, authHeader, headerParams);
+        var requestOptions = _getRequestOptions(httpMethod, uri, authHeader, headerParams, sdkVersion);
         
         protocol = http;
         if (uri.protocol === "https:") {
@@ -383,7 +384,7 @@ var _appendQueryString = function(uri, key, value) {
  *
  * @returns request options map
  */
-function _getRequestOptions(httpMethod, uri, authHeader, headerParam) {
+function _getRequestOptions(httpMethod, uri, authHeader, headerParam, sdkVersion) {
 
     var returnObj = {
         host: uri.hostname,
@@ -394,7 +395,7 @@ function _getRequestOptions(httpMethod, uri, authHeader, headerParam) {
             "Accept": "application/json",
             "Authorization": authHeader,
             "Content-Type": "application/json",
-            "User-Agent": "NodeJS-SDK/" + constants.VERSION
+            "User-Agent": "NodeJS-Core-SDK/" + constants.VERSION + "; NodeJS-SDK/" + sdkVersion
         }
     };
     
@@ -448,8 +449,8 @@ if (typeof global.it === 'function') {
         return  _getURI(path, action, params);
     };
     
-    MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam) {
-        return _getRequestOptions(httpMethod, uri, authHeader, headerParam);
+    MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam, sdkVersion) {
+        return _getRequestOptions(httpMethod, uri, authHeader, headerParam, sdkVersion);
     };
     
     MasterCardAPI.testInit = function (opts) {
@@ -458,7 +459,7 @@ if (typeof global.it === 'function') {
         sandbox = true;
         initialized = true;
         MasterCardAPI.API_BASE_SANDBOX_URL = "http://localhost:8080";
-
+        authentication = opts.authentication
         
     };
 

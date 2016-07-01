@@ -3,26 +3,23 @@ var UserPostHeader = require('./sdk-generated/UserPostHeader');
 var UserPostPath = require('./sdk-generated/UserPostPath');
 var MasterCardAPI = require('../index');
 var mastercardError = require('../lib/error');
-
-
+var mockAuthentication = require("./mock/mockAuthentication");
 
 // Imports for Test
 var should = require('should');
 var assert = require('assert');
 
 describe('Post', function () {
-    
-    
+
     before(function() {
-        
         MasterCardAPI.testInit({
             sandbox: true,
-            authentication: null
+            authentication: mockAuthentication
         });
     });  
     
     it('test Action.list from Post --> 200', function (done) {
-        
+
         Post.list({}, function (error, data) {
                 data[0].id.should.equal(1);
                 data[0].title.should.equal("My Title");

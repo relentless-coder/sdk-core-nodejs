@@ -30,8 +30,8 @@ describe('lostStolen', function() {
             params: request
         },
         function (error, data) {
-            data.Account.Status.should.equal('true');
-            data.Account.Listed.should.equal('true');
+            data.Account.Status.should.equal(true);
+            data.Account.Listed.should.equal(true);
             data.Account.ReasonCode.should.equal("S");
             data.Account.Reason.should.equal("STOLEN");
             done();
