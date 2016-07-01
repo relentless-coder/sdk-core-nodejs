@@ -14,7 +14,7 @@
     "MasterCard",
     "API"
   ],
-  "author": "Eamon Doyle <eamon.doyle@mastercard.com> (https://developer.mastercard.com)",
+  "author": "MasterCard Worldwide <APISupport@mastercard.com> (https://developer.mastercard.com)",
   "license": "BSD-2-Clause",
   "devDependencies": {
     "istanbul": "^0.4.2",
