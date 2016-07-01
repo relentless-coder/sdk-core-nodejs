@@ -4,7 +4,9 @@
   "description": "Core functionality for MasterCard API",
   "main": "index.js",
   "scripts": {
-    "test": "istanbul cover _mocha"
+    "test": "mocha --reporter spec",
+    "testJenkins": "mocha > test/test-report.xml",
+    "testCoverage": "istanbul cover _mocha"
   },
   "repository": {
     "type": "git",
