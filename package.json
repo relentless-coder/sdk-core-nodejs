@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec",
-    "testJenkins": "mocha > test/test-report.xml",
+    "testJenkins": "mocha  | grep '^<' > test/test-report.xml",
     "testCoverage": "istanbul cover _mocha"
   },
   "repository": {
