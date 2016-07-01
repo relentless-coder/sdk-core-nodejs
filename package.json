@@ -1,0 +1,31 @@
+{
+  "name": "mastercard-api-core",
+  "version": "0.0.3",
+  "description": "Core functionality for MasterCard API",
+  "main": "index.js",
+  "scripts": {
+    "test": "istanbul cover _mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@ldntools.labs.mastercard.com:open-api/sdk-core-nodejs.git"
+  },
+  "keywords": [
+    "MasterCard",
+    "API"
+  ],
+  "author": "MasterCard Worldwide <APISupport@mastercard.com> (https://developer.mastercard.com)",
+  "license": "BSD-2-Clause",
+  "devDependencies": {
+    "istanbul": "^0.4.2",
+    "mocha": "^2.4.5",
+    "mock-require": "^1.2.1",
+    "mockery": "^1.4.1",
+    "rewire": "^2.5.1",
+    "should": "^8.2.2",
+    "sinon": "^1.17.3"
+  },
+  "dependencies": {
+    "node-forge": "^0.6.39"
+  }
+}
