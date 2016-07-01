@@ -444,6 +444,7 @@ MasterCardAPI.OAuth = oauth;
 //arizzini: if you need to expose private function only during unit testing use this
 if (typeof global.it === 'function') {
     // START EXPOSE PRIVATE FUNCTION FOR TESTING
+    var port = process.env.JENKINS_PORT ? process.env.JENKINS_PORT : 8080;
     
     MasterCardAPI.getUri = function(path, action, params) {
         return  _getURI(path, action, params);
@@ -458,7 +459,7 @@ if (typeof global.it === 'function') {
         test = true;
         sandbox = true;
         initialized = true;
-        MasterCardAPI.API_BASE_SANDBOX_URL = "http://localhost:8080";
+        MasterCardAPI.API_BASE_SANDBOX_URL = "http://localhost:" + port;
         authentication = opts.authentication
         
     };
