@@ -58,6 +58,18 @@ describe('MasterCardAPI', function() {
        params.length.should.equal(0);
     });
     
+    it('test _getUrl with path parameter and query parameter', function () {
+        var params = {
+            user_id: "1",
+            query_param: "query-param-value",
+            body: "bodyValue"
+        };
+        var replacedUri = MasterCardAPI.getUri("/masterpass/user/{user_id}","create", params, ['query_param']);
+        replacedUri.href.should.equal("https://sandbox.api.mastercard.com/masterpass/user/1?query_param=query-param-value&Format=JSON");
+        should.exist(params.body);
+        Object.keys(params).length.should.equal(1);
+    });
+
     it('test _getRequestOptions with header parameter ', function () {
        var headerParam = new Array();
        headerParam['version'] = "1";

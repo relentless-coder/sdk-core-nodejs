@@ -111,7 +111,7 @@ MasterCardAPI.execute = function (opts, callback) {
             
         var uri, httpMethod;
 
-        uri = _getURI(path, action, params);
+        uri = _getURI(path, action, params, opts.queryList);
 
         httpMethod = _getHttpMethod(action);
 
@@ -254,10 +254,11 @@ function _checkState() {
  * @param {String} path - The path for the API
  * @param {String} action - The type of action being invoked on the domain object
  * @param {Object} params - The request parameters
+ * @param {Object} additionalQueryParametersList - List of additional query parameters to support where Query and Body parameters used for create / update
  *
  * @return {Object} Returns a URI object needed for a HTTP request
  */
-function _getURI(path, action, params) {
+function _getURI(path, action, params, additionalQueryParametersList) {
     var uri = MasterCardAPI.API_BASE_PRODUCTION_URL;
 
     // Check if a sandbox is true and update the API endpoint accordingly
@@ -270,18 +271,6 @@ function _getURI(path, action, params) {
     
     // replace the path parameters
     uri = _replacePathParameters(uri, params);
-    
-    // Handle Id
-    switch (action) {
-        case "read":
-        case "update":
-        case "delete":
-            if (params.id) {
-                uri += "/" + params.id;
-                delete params.id;   // delete params
-            }
-            break;
-    }
 
     // Add query params to URI if any
     switch (action) {
@@ -291,6 +280,19 @@ function _getURI(path, action, params) {
         case "query":
             uri = _appendMapToQueryString(uri, params);
             break;
+    }
+
+    // create and update may have Query and Body parameters as part of the request.
+    // Check additionalQueryParametersList is set
+    if (utils.isSet(additionalQueryParametersList)) {
+        switch (action) {
+            case "create":
+            case "update":
+                // Get the submap of query parameters which also removes the values from objectMap
+                var queryParams = utils.subMap(params, additionalQueryParametersList);
+                uri = _appendMapToQueryString(uri, queryParams);
+                break;
+        }
     }
 
     // Add Format=JSON
@@ -446,8 +448,8 @@ if (typeof global.it === 'function') {
     // START EXPOSE PRIVATE FUNCTION FOR TESTING
     var port = process.env.JENKINS_PORT ? process.env.JENKINS_PORT : 8080;
     
-    MasterCardAPI.getUri = function(path, action, params) {
-        return  _getURI(path, action, params);
+    MasterCardAPI.getUri = function(path, action, params, additionalQueryParametersList) {
+        return  _getURI(path, action, params, additionalQueryParametersList);
     };
     
     MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam, sdkVersion) {
