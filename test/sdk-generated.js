@@ -3,7 +3,7 @@ var UserPostHeader = require('./sdk-generated/UserPostHeader');
 var UserPostPath = require('./sdk-generated/UserPostPath');
 var MasterCardAPI = require('../index');
 var mastercardError = require('../lib/error');
-var mockAuthentication = require("./mock/mockAuthentication");
+var mockAuthentication = require("./mock/mock-authentication");
 
 // Imports for Test
 var should = require('should');

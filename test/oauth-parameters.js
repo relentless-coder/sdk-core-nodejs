@@ -1,4 +1,4 @@
-var OAuthParameters = require('../lib/security/oauth/oauthParameters');
+var OAuthParameters = require('../lib/security/oauth/oauth-parameters');
 
 // Imports for Test
 var should = require('should');
