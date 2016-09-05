@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 MasterCard International.
+ * Copyright (c) 2013 - 2016, MasterCard International Incorporated
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are 
  * permitted provided that the following conditions are met:
@@ -26,197 +27,187 @@
  */
 
 var MasterCardAPI = require('../../index');
+var SdkConfig = require('./sdk-config');
 var Post = {};
+var operationConfigs = {};
 
-    /**
-     * Private function to resolve the ResourcePath
-     * @returns String of the path of the resource
-     * @private
-     */
-    var _getResourcePath = function(action) {
-    
-         if (action == "list") {
-           return "/mock_crud_server/posts";
-        }
-        if (action == "create") {
-            return "/mock_crud_server/posts";
-        }
-        if (action == "read") {
-            return "/mock_crud_server/posts/{id}";
-        }
-        if (action == "query") {
-            return "/mock_crud_server/posts/{id}";
-        }
-        if (action == "update") {
-            return "/mock_crud_server/posts/{id}";
-        }
-        if (action == "delete") {
-            return "/mock_crud_server/posts/{id}";
-        }
-        throw "Error: path not found for action '"+action+"'";
-    };
+/**
+ * Initialize Post
+ * @private
+ */
+var _init = function() {
+    operationConfigs["564f0c16-88e4-49a6-89b9-02a078c24f86"] = new MasterCardAPI.OperationConfig("/mock_crud_server/posts", "list", ["max"], [""]);
+    operationConfigs["c36da486-2fe5-49e0-8cb0-7a07a927e200"] = new MasterCardAPI.OperationConfig("/mock_crud_server/posts", "create", [""], [""]);
+    operationConfigs["e86f4a01-fe24-4039-a8fb-a7d2f181ee81"] = new MasterCardAPI.OperationConfig("/mock_crud_server/posts/{id}", "read", [""], [""]);
+    operationConfigs["39ce9593-7610-4ed3-b37e-66a77a27d14d"] = new MasterCardAPI.OperationConfig("/mock_crud_server/posts/{id}", "update", [""], [""]);
+    operationConfigs["8b386afc-419a-41cd-b706-7537d1b8b8e6"] = new MasterCardAPI.OperationConfig("/mock_crud_server/posts/{id}", "delete", [""], [""]);
 
+    // Added for testing
+    operationConfigs["4e32ae90-7137-11e6-8b77-86f30ca893d3"] = new MasterCardAPI.OperationConfig("/mock_crud_server/posts/{id}", "query", [""], [""]);
+};
 
-    /**
-     * Private function to get list of Header Parameter
-     * @returns
-     * @private
-     */
-    var _getHeaderList = function(action) {
-    
-        if (action == "list") {
-           return [];
-        }
-        if (action == "create") {
-            return [];
-        }
-        if (action == "read") {
-            return [];
-        }
-        if (action == "query") {
-            return [];
-        }
-        if (action == "update") {
-            return [];
-        }
-        if (action == "delete") {
-            return [];
-        }
-        return [];
-    };
+_init();
+
+/**
+ * Private function to get operation config
+ * @returns Object operation config
+ * @private
+ */
+var _getOperationConfig = function(operationUUID) {
+    var operationConfig = operationConfigs[operationUUID];
+
+    if(!MasterCardAPI.isSet(operationConfig)) {
+        throw new MasterCardAPI.MasterCardError.SDKError("Invalid operationUUID supplied: " + operationUUID);
+    }
+
+    return operationConfig;
+};
+
+var _getOperationMetaData = function() {
+    return new MasterCardAPI.OperationMetaData(SdkConfig.getVersion(), SdkConfig.getHost());
+};
 
 
+// Added for testing
+Post.query = function(params, callback) {
+    if (!MasterCardAPI.isSet(params)) {
+        params = {};
+    }
 
-
-    
-    /**
-     * Function to retrieve a list Post objects.
-     *
-     * @method list
-     * @param {Object} params - A map of parameters in which to define the Post list from.<br/><br/>
-     * @param {Function} callback A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    Post.list = function(params, callback) {
-        if (!MasterCardAPI.isSet(params)) {
-            params = {};
-        }
-
+    try {
         MasterCardAPI.execute({
-            action: "list",
-            path: _getResourcePath("list"),
-            headerList: _getHeaderList("list"),
+            operationConfig: _getOperationConfig("4e32ae90-7137-11e6-8b77-86f30ca893d3"),
+            operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
-    };
-    
-    
-    
-    
-    //test query
-    Post.query = function(params, callback) {
-        if (!MasterCardAPI.isSet(params)) {
-            params = {};
-        }
+    }
+    catch (e) {
+        callback(e, null);
+    }
+};
 
+/**
+ * Function to retrieve a list Post objects.
+ *
+ * @method list
+ * @param {Object} params - A map of parameters in which to define the Post list from.
+ * @param {Function} callback A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+Post.list = function(params, callback) {
+    if (!MasterCardAPI.isSet(params)) {
+        params = {};
+    }
+
+    try {
         MasterCardAPI.execute({
-            action: "query",
-            path: _getResourcePath("query"),
-            headerList: _getHeaderList("query"),
+            operationConfig: _getOperationConfig("564f0c16-88e4-49a6-89b9-02a078c24f86"),
+            operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
-    };
+    }
+    catch (e) {
+        callback(e, null);
+    }
 
-
+};
 
     
-    /**
-     * Function to create a Post object.
-     *
-     * @method create
-     * @param {Object} params - A map of parameters in which to create the Post from.<br/><br/>
-     * @param {Function} callback - A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    Post.create = function(params, callback) {
+/**
+ * Function to create a Post object.
+ *
+ * @method create
+ * @param {Object} params - A map of parameters in which to create the Post from.
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+Post.create = function(params, callback) {
+    try {
         MasterCardAPI.execute({
-            action: "create",
-            path: _getResourcePath("create"),
-            headerList: _getHeaderList("create"),
+            operationConfig: _getOperationConfig("c36da486-2fe5-49e0-8cb0-7a07a927e200"),
+            operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
-    };
+    }
+    catch (e) {
+        callback(e, null);
+    }
 
-
-
-
-
-
-
-
+};
     
-    /**
-     * Function to retrieve a Post object from the API.
-     *
-     * @method find
-     * @param {String} id - The ID of the Post to retrieve
-     * @param {Object} query - A map of parameters in which to create the Post from.<br/><br/>
-     * @param {Function} callback - A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    Post.read = function(id, query, callback) {
-        var params = MasterCardAPI.isSet(query) ? query : {};
-        params.id = id;
+/**
+ * Function to retrieve a Post object from the API.
+ *
+ * @method find
+ * @param {String} id - The ID of the Post to retrieve
+ * @param {Object} query - A map of parameters in which to create the Post from.
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+Post.read = function(id, query, callback) {
+    var params = MasterCardAPI.isSet(query) ? query : {};
+    params.id = id;
 
+    try {
         MasterCardAPI.execute({
-            action: "read",
-            path: _getResourcePath("read"),
-            headerList: _getHeaderList("read"),
+            operationConfig: _getOperationConfig("e86f4a01-fe24-4039-a8fb-a7d2f181ee81"),
+            operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
-    };
+    }
+    catch (e) {
+        callback(e, null);
+    }
 
+};
     
-    /**
-     * Function to update a Post object.
-     *
-     * @method update
-     * @param {Object} params - A map of parameters on which to update the Post object.<br/><br/>
-     * @param {Function} callback - A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    Post.update = function(params, callback) {
+/**
+ * Function to update a Post object.
+ *
+ * @method update
+ * @param {Object} params - A map of parameters on which to update the Post object.
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+Post.update = function(params, callback) {
+    try {
         MasterCardAPI.execute({
-            action: "update",
-            path: _getResourcePath("update"),
-            headerList: _getHeaderList("update"),
+            operationConfig: _getOperationConfig("39ce9593-7610-4ed3-b37e-66a77a27d14d"),
+            operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
-    };
+    }
+    catch (e) {
+        callback(e, null);
+    }
 
-
-
-
-
-
+};
 
     
-    /**
-     * Function to delete a Post object.
-     *
-     * @method delete
-     * @param {String} id - A string ID of the Post to delete.
-     * @param {Function} callback - A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    Post.delete = function(id, callback) {
-        MasterCardAPI.execute({
-            action: "delete",
-            path: _getResourcePath("delete"),
-            headerList: _getHeaderList("delete"),
-            params: { id: id }
-        }, callback);
-    };
+/**
+ * Function to delete a Post object.
+ *
+ * @method delete
+ * @param {String} id - A string ID of the Post to delete.
+ * @param {Object} map - a map of additional parameters
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+Post.delete = function(id, map, callback) {
+    var params = MasterCardAPI.isSet(map) ? map : {};
+    params.id = id;
 
+    try {
+        MasterCardAPI.execute({
+            operationConfig: _getOperationConfig("8b386afc-419a-41cd-b706-7537d1b8b8e6"),
+            operationMetaData: _getOperationMetaData(),
+            params: params
+        }, callback);
+    }
+    catch (e) {
+        callback(e, null);
+    }
+
+};
 
 module.exports = Post;

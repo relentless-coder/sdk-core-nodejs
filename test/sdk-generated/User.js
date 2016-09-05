@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 MasterCard International.
+ * Copyright (c) 2013 - 2016, MasterCard International Incorporated
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are 
  * permitted provided that the following conditions are met:
@@ -26,174 +27,167 @@
  */
 
 var MasterCardAPI = require('../../index');
+var SdkConfig = require('./sdk-config');
 var User = {};
+var operationConfigs = {};
 
-    /**
-     * Private function to resolve the ResourcePath
-     * @returns String of the path of the resource
-     * @private
-     */
-    var _getResourcePath = function(action) {
+/**
+ * Initialize User
+ * @private
+ */
+var _init = function() {
+    operationConfigs["4f9b64d6-5982-450b-b3d6-6b785d739542"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users", "list", [""], [""]);
+    operationConfigs["bb5fb29a-d79f-4e9c-823e-2f255d64383e"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users", "create", [""], [""]);
+    operationConfigs["6d6677bd-e24e-4646-96aa-fcdedd20e367"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{id}", "read", [""], [""]);
+    operationConfigs["4adc63cd-646d-4edf-9601-69e2caf2230c"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{id}", "update", [""], [""]);
+    operationConfigs["d28171c3-1d94-48be-934a-6adf3a73ee90"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{id}", "delete", [""], [""]);
     
-        if (action == "list") {
-           return "/mock_crud_server/users";
-        }
-        if (action == "create") {
-            return "/mock_crud_server/users";
-        }
-        if (action == "read") {
-            return "/mock_crud_server/users/{id}";
-        }
-        if (action == "update") {
-            return "/mock_crud_server/users/{id}";
-        }
-        if (action == "delete") {
-            return "/mock_crud_server/users/{id}";
-        }
-        throw "Error: path not found for action '"+action+"'";
-    };
+};
 
+_init();
 
-    /**
-     * Private function to get list of Header Parameter
-     * @returns
-     * @private
-     */
-    var _getHeaderList = function(action) {
-    
-        if (action == "list") {
-           return [];
-        }
-        if (action == "create") {
-            return [];
-        }
-        if (action == "read") {
-            return [];
-        }
-        if (action == "update") {
-            return [];
-        }
-        if (action == "delete") {
-            return [];
-        }
-        return [];
-    };
+/**
+ * Private function to get operation config
+ * @returns Object operation config
+ * @private
+ */
+var _getOperationConfig = function(operationUUID) {
+    var operationConfig = operationConfigs[operationUUID];
 
+    if(!MasterCardAPI.isSet(operationConfig)) {
+        throw new MasterCardAPI.MasterCardError.SDKError("Invalid operationUUID supplied: " + operationUUID);
+    }
 
+    return operationConfig;
+};
 
+var _getOperationMetaData = function() {
+    return new MasterCardAPI.OperationMetaData(SdkConfig.getVersion(), SdkConfig.getHost());
+};
 
     
-    /**
-     * Function to retrieve a list User objects.
-     *
-     * @method list
-     * @param {Object} params - A map of parameters in which to define the User list from.<br/><br/>
-     * @param {Function} callback A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    User.list = function(params, callback) {
-        if (!MasterCardAPI.isSet(params)) {
-            params = {};
-        }
+/**
+ * Function to retrieve a list User objects.
+ *
+ * @method list
+ * @param {Object} params - A map of parameters in which to define the User list from.
+ * @param {Function} callback A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+User.list = function(params, callback) {
+    if (!MasterCardAPI.isSet(params)) {
+        params = {};
+    }
 
+    try {
         MasterCardAPI.execute({
-            action: "list",
-            path: _getResourcePath("list"),
-            headerList: _getHeaderList("list"),
+            operationConfig: _getOperationConfig("4f9b64d6-5982-450b-b3d6-6b785d739542"),
+            operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
-    };
+    }
+    catch (e) {
+        callback(e, null);
+    }
 
-
+};
 
     
-    /**
-     * Function to create a User object.
-     *
-     * @method create
-     * @param {Object} params - A map of parameters in which to create the User from.<br/><br/>
-     * @param {Function} callback - A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    User.create = function(params, callback) {
+/**
+ * Function to create a User object.
+ *
+ * @method create
+ * @param {Object} params - A map of parameters in which to create the User from.
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+User.create = function(params, callback) {
+    try {
         MasterCardAPI.execute({
-            action: "create",
-            path: _getResourcePath("create"),
-            headerList: _getHeaderList("create"),
+            operationConfig: _getOperationConfig("bb5fb29a-d79f-4e9c-823e-2f255d64383e"),
+            operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
-    };
+    }
+    catch (e) {
+        callback(e, null);
+    }
 
-
-
-
-
-
-
-
+};
     
-    /**
-     * Function to retrieve a User object from the API.
-     *
-     * @method find
-     * @param {String} id - The ID of the User to retrieve
-     * @param {Object} query - A map of parameters in which to create the User from.<br/><br/>
-     * @param {Function} callback - A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    User.read = function(id, query, callback) {
-        var params = MasterCardAPI.isSet(query) ? query : {};
-        params.id = id;
+/**
+ * Function to retrieve a User object from the API.
+ *
+ * @method find
+ * @param {String} id - The ID of the User to retrieve
+ * @param {Object} query - A map of parameters in which to create the User from.
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+User.read = function(id, query, callback) {
+    var params = MasterCardAPI.isSet(query) ? query : {};
+    params.id = id;
 
+    try {
         MasterCardAPI.execute({
-            action: "read",
-            path: _getResourcePath("read"),
-            headerList: _getHeaderList("read"),
+            operationConfig: _getOperationConfig("6d6677bd-e24e-4646-96aa-fcdedd20e367"),
+            operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
-    };
+    }
+    catch (e) {
+        callback(e, null);
+    }
 
+};
     
-    /**
-     * Function to update a User object.
-     *
-     * @method update
-     * @param {Object} params - A map of parameters on which to update the User object.<br/><br/>
-     * @param {Function} callback - A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    User.update = function(params, callback) {
+/**
+ * Function to update a User object.
+ *
+ * @method update
+ * @param {Object} params - A map of parameters on which to update the User object.
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+User.update = function(params, callback) {
+    try {
         MasterCardAPI.execute({
-            action: "update",
-            path: _getResourcePath("update"),
-            headerList: _getHeaderList("update"),
+            operationConfig: _getOperationConfig("4adc63cd-646d-4edf-9601-69e2caf2230c"),
+            operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
-    };
+    }
+    catch (e) {
+        callback(e, null);
+    }
 
-
-
-
-
-
+};
 
     
-    /**
-     * Function to delete a User object.
-     *
-     * @method delete
-     * @param {String} id - A string ID of the User to delete.
-     * @param {Function} callback - A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    User.delete = function(id, callback) {
-        MasterCardAPI.execute({
-            action: "delete",
-            path: _getResourcePath("delete"),
-            headerList: _getHeaderList("delete"),
-            params: { id: id }
-        }, callback);
-    };
+/**
+ * Function to delete a User object.
+ *
+ * @method delete
+ * @param {String} id - A string ID of the User to delete.
+ * @param {Object} map - a map of additional parameters
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+User.delete = function(id, map, callback) {
+    var params = MasterCardAPI.isSet(map) ? map : {};
+    params.id = id;
 
+    try {
+        MasterCardAPI.execute({
+            operationConfig: _getOperationConfig("d28171c3-1d94-48be-934a-6adf3a73ee90"),
+            operationMetaData: _getOperationMetaData(),
+            params: params
+        }, callback);
+    }
+    catch (e) {
+        callback(e, null);
+    }
+
+};
 
 module.exports = User;

@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 MasterCard International.
+ * Copyright (c) 2013 - 2016, MasterCard International Incorporated
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are 
  * permitted provided that the following conditions are met:
@@ -26,61 +27,66 @@
  */
 
 var MasterCardAPI = require('../../index');
+var SdkConfig = require('./sdk-config');
 var UserPostPath = {};
+var operationConfigs = {};
 
-    /**
-     * Private function to resolve the ResourcePath
-     * @returns String of the path of the resource
-     * @private
-     */
-    var _getResourcePath = function(action) {
+/**
+ * Initialize UserPostPath
+ * @private
+ */
+var _init = function() {
+    operationConfigs["b9d165fb-0a50-4a5d-9166-137461373cda"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{user_id}/posts", "list", [""], [""]);
     
-        if (action == "list") {
-           return "/mock_crud_server/users/{user_id}/posts";
-        }
-        throw "Error: path not found for action '"+action+"'";
-    };
+};
 
+_init();
 
-    /**
-     * Private function to get list of Header Parameter
-     * @returns
-     * @private
-     */
-    var _getHeaderList = function(action) {
+/**
+ * Private function to get operation config
+ * @returns Object operation config
+ * @private
+ */
+var _getOperationConfig = function(operationUUID) {
+    var operationConfig = operationConfigs[operationUUID];
+
+    if(!MasterCardAPI.isSet(operationConfig)) {
+        throw new MasterCardAPI.MasterCardError.SDKError("Invalid operationUUID supplied: " + operationUUID);
+    }
+
+    return operationConfig;
+};
+
+var _getOperationMetaData = function() {
+    return new MasterCardAPI.OperationMetaData(SdkConfig.getVersion(), SdkConfig.getHost());
+};
+
     
-        if (action == "list") {
-           return [];
-        }
-        return [];
-    };
+/**
+ * Function to retrieve a list UserPostPath objects.
+ *
+ * @method list
+ * @param {Object} params - A map of parameters in which to define the UserPostPath list from.
+ * @param {Function} callback A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+UserPostPath.list = function(params, callback) {
+    if (!MasterCardAPI.isSet(params)) {
+        params = {};
+    }
 
-
-
-
-    
-    /**
-     * Function to retrieve a list UserPostPath objects.
-     *
-     * @method list
-     * @param {Object} params - A map of parameters in which to define the UserPostPath list from.<br/><br/>
-     * @param {Function} callback A function to handle success/error responses from the API.<br/>
-     * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
-     */
-    UserPostPath.list = function(params, callback) {
-        if (!MasterCardAPI.isSet(params)) {
-            params = {};
-        }
-
+    try {
         MasterCardAPI.execute({
-            action: "list",
-            path: _getResourcePath("list"),
-            headerList: _getHeaderList("list"),
+            operationConfig: _getOperationConfig("b9d165fb-0a50-4a5d-9166-137461373cda"),
+            operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
-    };
+    }
+    catch (e) {
+        callback(e, null);
+    }
 
-
+};
 
 
 module.exports = UserPostPath;

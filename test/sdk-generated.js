@@ -1,5 +1,4 @@
 var Post = require('./sdk-generated/Post');
-var UserPostQueryAndBody = require('./sdk-generated/UserPostQueryAndBody');
 var UserPostHeader = require('./sdk-generated/UserPostHeader');
 var UserPostPath = require('./sdk-generated/UserPostPath');
 var MasterCardAPI = require('../index');
@@ -118,8 +117,8 @@ describe('Post', function () {
     
     it('test Action.delete from Post --> 200', function (done) {
         
-        Post.delete("1", function (error, data) {
-            assert(data  != null)
+        Post.delete("1", {}, function (error, data) {
+            assert(data  != null);
             done();
         });
     });
@@ -148,16 +147,5 @@ describe('Post', function () {
         });
     });
     
-
-    it('test Action.list from UserPostQueryAndBody --> 200', function (done) {
-
-        UserPostQueryAndBody.create({'title': 'My Title', 'body': 'some body text', 'query-param': 'query-param-value'}, function (error, data) {
-            data.id.should.equal(1);
-            data.title.should.equal("My Title");
-            data.body.should.equal("some body text");
-            data.userId.should.equal(1);
-            done();
-        });
-    });
 
 });
