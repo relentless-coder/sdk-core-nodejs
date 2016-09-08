@@ -1,4 +1,4 @@
-var OAuthParameters = require('../lib/security/oauth/oauthParameters');
+var OAuthParameters = require('../lib/security/oauth/oauth-parameters');
 
 // Imports for Test
 var should = require('should');
@@ -25,7 +25,6 @@ describe('OAuthParameters', function() {
         nonce.length.should.equal(length);
 
         // Test Chars
-        //console.log("nonce: " + nonce);
         new RegExp("^[" + OAuthParameters._testonly_.VALID_CHARS + "]+$").test(nonce).should.equal(true);
     });
 

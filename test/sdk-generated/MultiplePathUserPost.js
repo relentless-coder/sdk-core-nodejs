@@ -28,15 +28,17 @@
 
 var MasterCardAPI = require('../../index');
 var SdkConfig = require('./sdk-config');
-var UserPostHeader = {};
+var MultiplePathUserPost = {};
 var operationConfigs = {};
 
 /**
- * Initialize UserPostHeader
+ * Initialize MultiplePathUserPost
  * @private
  */
 var _init = function() {
-    operationConfigs["95d01027-a76d-4dc8-a76f-9d1e1a0d2ed5"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/posts", "list", [""], ["user_id"]);
+    operationConfigs["2097ebd3-5dd3-4987-ae0e-0dd05634899f"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{user_id}/post/{post_id}", "list", [""], [""]);
+    operationConfigs["ea76b836-59ee-401f-8b1e-54d91de37704"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{user_id}/post/{post_id}", "update", ["testQuery"], [""]);
+    operationConfigs["c7226817-f724-4f30-806c-3f9f4397eea2"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{user_id}/post/{post_id}", "delete", [""], [""]);
     
 };
 
@@ -63,21 +65,21 @@ var _getOperationMetaData = function() {
 
     
 /**
- * Function to retrieve a list UserPostHeader objects.
+ * Function to retrieve a list MultiplePathUserPost objects.
  *
  * @method list
- * @param {Object} params - A map of parameters in which to define the UserPostHeader list from.
+ * @param {Object} params - A map of parameters in which to define the MultiplePathUserPost list from.
  * @param {Function} callback A function to handle success/error responses from the API.<br/>
  * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
  */
-UserPostHeader.list = function(params, callback) {
+MultiplePathUserPost.list = function(params, callback) {
     if (!MasterCardAPI.isSet(params)) {
         params = {};
     }
 
     try {
         MasterCardAPI.execute({
-            operationConfig: _getOperationConfig("95d01027-a76d-4dc8-a76f-9d1e1a0d2ed5"),
+            operationConfig: _getOperationConfig("2097ebd3-5dd3-4987-ae0e-0dd05634899f"),
             operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
@@ -88,5 +90,54 @@ UserPostHeader.list = function(params, callback) {
 
 };
 
+    
+/**
+ * Function to update a MultiplePathUserPost object.
+ *
+ * @method update
+ * @param {Object} params - A map of parameters on which to update the MultiplePathUserPost object.
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+MultiplePathUserPost.update = function(params, callback) {
+    try {
+        MasterCardAPI.execute({
+            operationConfig: _getOperationConfig("ea76b836-59ee-401f-8b1e-54d91de37704"),
+            operationMetaData: _getOperationMetaData(),
+            params: params
+        }, callback);
+    }
+    catch (e) {
+        callback(e, null);
+    }
 
-module.exports = UserPostHeader;
+};
+
+    
+/**
+ * Function to delete a MultiplePathUserPost object.
+ *
+ * @method delete
+ * @param {String} id - A string ID of the MultiplePathUserPost to delete.
+ * @param {Object} map - a map of additional parameters
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+MultiplePathUserPost.delete = function(id, map, callback) {
+    var params = MasterCardAPI.isSet(map) ? map : {};
+    params.id = id;
+
+    try {
+        MasterCardAPI.execute({
+            operationConfig: _getOperationConfig("c7226817-f724-4f30-806c-3f9f4397eea2"),
+            operationMetaData: _getOperationMetaData(),
+            params: params
+        }, callback);
+    }
+    catch (e) {
+        callback(e, null);
+    }
+
+};
+
+module.exports = MultiplePathUserPost;

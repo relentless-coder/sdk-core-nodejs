@@ -7,6 +7,9 @@ var p12Path = "./keystore/mcapi_sandbox_key.p12";
 var alias = "test";
 var password = "password";
 
+var operationConfig = new MasterCardAPI.OperationConfig("/fraud/loststolen/v1/account-inquiry", "update", [""], [""]);
+var operationMetaData = new MasterCardAPI.OperationMetaData("1.0.0", null);
+
 describe('lostStolen', function() {
 
     it('send valid request', function(done){
@@ -24,9 +27,8 @@ describe('lostStolen', function() {
         };
 
         MasterCardAPI.execute({
-            action: "update",
-            path: "/fraud/loststolen/v1/account-inquiry",
-            headerList: [],
+            operationConfig: operationConfig,
+            operationMetaData: operationMetaData,
             params: request
         },
         function (error, data) {
@@ -54,9 +56,8 @@ describe('lostStolen', function() {
         };
 
         MasterCardAPI.execute({
-            action: "update",
-            path: "/fraud/loststolen/v1/account-inquiry",
-            headerList: [],
+            operationConfig: operationConfig,
+            operationMetaData: operationMetaData,
             params: request
         },
         function (error, data) {

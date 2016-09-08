@@ -37,16 +37,19 @@ var MasterCardAPI = {};
 var mastercardError = require('./lib/error');
 var constants = require('./lib/constants');
 var oauth = require("./lib/security/oauth/oauth");
+var operationConfig = require("./lib/operation-config");
+var operationMetaData = require("./lib/operation-metadata");
 var utils = require("./lib/utils");
 var http = require('http');
 var https = require('https');
 var url = require('url');
 
 // Variables
-var sandbox = false;
+var sandbox = true;
 var authentication = null;
 var initialized = false;
 var test = false;
+var host = null;
 
 /**
  * Production URL
@@ -75,12 +78,23 @@ MasterCardAPI.init = function (opts) {
     if (utils.isSet(opts.sandbox)) {
         sandbox = opts.sandbox;
     }
+    else {
+        sandbox = true;
+    }
 
     if (utils.isSet(opts.authentication)) {
         authentication = opts.authentication;
     }
     else {
         throw new Error("Authentication must be set");
+    }
+
+    // Check if a sandbox is true and update the API endpoint accordingly
+    if (sandbox) {
+        host = MasterCardAPI.API_BASE_SANDBOX_URL;
+    }
+    else {
+        host = MasterCardAPI.API_BASE_PRODUCTION_URL;
     }
 
     initialized = true;
@@ -99,26 +113,23 @@ MasterCardAPI.execute = function (opts, callback) {
 
     try {
         // Check SDK has been correctly initialized
-        
-        
         _checkState();
 
-        var path = opts.path;
-        var action = opts.action;
+        var operationConfig = opts.operationConfig;
+        var operationMetaData = opts.operationMetaData;
         var params = opts.params;
-        var sdkVersion = opts.sdkVersion;
-        var headerParams = utils.subMap(params, opts.headerList);
-            
+        var headerParams = utils.subMap(params, operationConfig.headerParams);
+
         var uri, httpMethod;
 
-        uri = _getURI(path, action, params, opts.queryList);
+        uri = _getURI(params, operationConfig, operationMetaData);
 
-        httpMethod = _getHttpMethod(action);
+        httpMethod = _getHttpMethod(operationConfig.action);
 
         var body = JSON.stringify(params);
         var authHeader = authentication.sign(uri, httpMethod, body);
 
-        var requestOptions = _getRequestOptions(httpMethod, uri, authHeader, headerParams, sdkVersion);
+        var requestOptions = _getRequestOptions(httpMethod, uri, authHeader, headerParams, operationMetaData);
         
         protocol = http;
         if (uri.protocol === "https:") {
@@ -251,29 +262,35 @@ function _checkState() {
  * Function to build up the URI endpoint to use in the request.
  *
  * @private
- * @param {String} path - The path for the API
- * @param {String} action - The type of action being invoked on the domain object
  * @param {Object} params - The request parameters
- * @param {Object} additionalQueryParametersList - List of additional query parameters to support where Query and Body parameters used for create / update
+ * @param {Object} operationConfig
+ * <pre>
+ *  path - The path for the API<br>
+ *  action - The type of action being invoked on the domain object<br>
+ *  queryParams - List of additional query parameters to support where Query and Body parameters used for create / update
+ * </pre>
+ * @param {Object} operationMetaData<br>
+ * <pre>
+ *  host - the host to send to if overridden
+ * </pre>
  *
  * @return {Object} Returns a URI object needed for a HTTP request
  */
-function _getURI(path, action, params, additionalQueryParametersList) {
-    var uri = MasterCardAPI.API_BASE_PRODUCTION_URL;
+function _getURI(params, operationConfig, operationMetaData) {
+    var uri = host;
 
-    // Check if a sandbox is true and update the API endpoint accordingly
-    if (sandbox) {
-        uri = MasterCardAPI.API_BASE_SANDBOX_URL;
+    if (utils.isSet(operationMetaData.host)) {
+        uri = operationMetaData.host
     }
 
     // Modify URI to point to the correct API path
-    uri = uri + path;
+    uri = uri + operationConfig.path;
     
     // replace the path parameters
     uri = _replacePathParameters(uri, params);
 
     // Add query params to URI if any
-    switch (action) {
+    switch (operationConfig.action) {
         case "read":
         case "list":
         case "delete":
@@ -284,12 +301,12 @@ function _getURI(path, action, params, additionalQueryParametersList) {
 
     // create and update may have Query and Body parameters as part of the request.
     // Check additionalQueryParametersList is set
-    if (utils.isSet(additionalQueryParametersList)) {
-        switch (action) {
+    if (utils.isSet(operationConfig.queryParams)) {
+        switch (operationConfig.action) {
             case "create":
             case "update":
                 // Get the submap of query parameters which also removes the values from objectMap
-                var queryParams = utils.subMap(params, additionalQueryParametersList);
+                var queryParams = utils.subMap(params, operationConfig.queryParams);
                 uri = _appendMapToQueryString(uri, queryParams);
                 break;
         }
@@ -383,10 +400,11 @@ var _appendQueryString = function(uri, key, value) {
  * @param {Object} uri - An object containing the properties of a URI
  * @param {String} authHeader - String containing Authorization header data
  * @param {Object} headerParam - An map containing the extra header parames which needs to be added
+ * @param {Object} operationMetaData - contains SDK version
  *
  * @returns request options map
  */
-function _getRequestOptions(httpMethod, uri, authHeader, headerParam, sdkVersion) {
+function _getRequestOptions(httpMethod, uri, authHeader, headerParam, operationMetaData) {
 
     var returnObj = {
         host: uri.hostname,
@@ -397,7 +415,7 @@ function _getRequestOptions(httpMethod, uri, authHeader, headerParam, sdkVersion
             "Accept": "application/json",
             "Authorization": authHeader,
             "Content-Type": "application/json",
-            "User-Agent": "NodeJS-Core-SDK/" + constants.VERSION + "; NodeJS-SDK/" + sdkVersion
+            "User-Agent": "NodeJS-Core-SDK/" + constants.VERSION + "; NodeJS-SDK/" + operationMetaData.version
         }
     };
     
@@ -440,7 +458,11 @@ function _getHttpMethod(action) {
     return httpMethod;
 }
 
+// Expose classes
 MasterCardAPI.OAuth = oauth;
+MasterCardAPI.OperationConfig = operationConfig;
+MasterCardAPI.OperationMetaData = operationMetaData;
+MasterCardAPI.MasterCardError = mastercardError;
 
 
 //arizzini: if you need to expose private function only during unit testing use this
@@ -448,12 +470,12 @@ if (typeof global.it === 'function') {
     // START EXPOSE PRIVATE FUNCTION FOR TESTING
     var port = process.env.JENKINS_PORT ? process.env.JENKINS_PORT : 8080;
     
-    MasterCardAPI.getUri = function(path, action, params, additionalQueryParametersList) {
-        return  _getURI(path, action, params, additionalQueryParametersList);
+    MasterCardAPI.getUri = function(params, operationConfig, operationMetaData) {
+        return _getURI(params, operationConfig, operationMetaData);
     };
     
-    MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam, sdkVersion) {
-        return _getRequestOptions(httpMethod, uri, authHeader, headerParam, sdkVersion);
+    MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam, operationMetaData) {
+        return _getRequestOptions(httpMethod, uri, authHeader, headerParam, operationMetaData);
     };
     
     MasterCardAPI.testInit = function (opts) {
@@ -461,7 +483,6 @@ if (typeof global.it === 'function') {
         test = true;
         sandbox = true;
         initialized = true;
-        MasterCardAPI.API_BASE_SANDBOX_URL = "http://localhost:" + port;
         authentication = opts.authentication
         
     };

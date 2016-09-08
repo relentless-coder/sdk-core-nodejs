@@ -81,7 +81,7 @@ describe('OAuth', function() {
         // Mocking
 
         // given
-        var userServiceMock = require("./mock/mockOAuthParameters");
+        var userServiceMock = require("./mock/mock-oauth-parameters");
 
         OAuth.__set__({
             'OAuthParameters': userServiceMock

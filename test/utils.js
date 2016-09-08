@@ -16,8 +16,8 @@ describe('utils', function () {
         utils.isSet(true).should.equal(true);
     });
 
-    it('false should return false', function () {
-        utils.isSet(false).should.equal(false);
+    it('false should return true', function () {
+        utils.isSet(false).should.equal(true);
     });
 
     it('\'\' should return false', function () {
