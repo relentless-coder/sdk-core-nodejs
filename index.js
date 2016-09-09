@@ -48,6 +48,7 @@ var url = require('url');
 var sandbox = true;
 var authentication = null;
 var initialized = false;
+var debug = false;
 var test = false;
 var host = null;
 
@@ -80,6 +81,12 @@ MasterCardAPI.init = function (opts) {
     }
     else {
         sandbox = true;
+    }
+    
+    if (utils.isSet(opts.debug)) {
+        debug = opts.debug;
+    } else {
+        debug = false;
     }
 
     if (utils.isSet(opts.authentication)) {
@@ -123,13 +130,27 @@ MasterCardAPI.execute = function (opts, callback) {
         var uri, httpMethod;
 
         uri = _getURI(params, operationConfig, operationMetaData);
-
         httpMethod = _getHttpMethod(operationConfig.action);
-
         var body = JSON.stringify(params);
         var authHeader = authentication.sign(uri, httpMethod, body);
-
+        
+        
         var requestOptions = _getRequestOptions(httpMethod, uri, authHeader, headerParams, operationMetaData);
+        
+        if (debug) {
+            console.log( "---- Request ----");
+            console.log( "URL");
+            console.log( httpMethod+"="+uri.href);
+            console.log( "");
+            console.log( "Headers");
+            console.log( JSON.stringify(requestOptions.headers) );
+            console.log( "");
+            console.log( "Body" );
+            console.log( body );
+            console.log( "------------------");
+            console.log( "" );
+
+        }
         
         protocol = http;
         if (uri.protocol === "https:") {
@@ -151,6 +172,21 @@ MasterCardAPI.execute = function (opts, callback) {
             httpResponse.on('end', function () {
 
                 var statusCode = httpResponse.statusCode
+                
+                if (debug) {
+                    console.log( "---- Response ----");
+                    console.log( "Statis");
+                    console.log( statusCode);
+                    console.log( "");
+                    console.log( "Headers");
+                    console.log( JSON.stringify(httpResponse.headers) );
+                    console.log( "");
+                    console.log( "Body" );
+                    console.log( httpResponseData );
+                    console.log( "------------------");
+                    console.log( "");
+                }
+                
 
                 if (statusCode < 300) {
                     var jsonResponse = null;
