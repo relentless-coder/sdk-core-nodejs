@@ -26,7 +26,7 @@ describe('test MerchantIdentifier', function() {
 
         MasterCardAPI.init({
             sandbox: true,
-            debug: true,
+            debug: false,
             authentication: authentication
         });
         
