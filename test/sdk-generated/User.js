@@ -36,11 +36,13 @@ var operationConfigs = {};
  * @private
  */
 var _init = function() {
-    operationConfigs["4f9b64d6-5982-450b-b3d6-6b785d739542"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users", "list", [""], [""]);
-    operationConfigs["bb5fb29a-d79f-4e9c-823e-2f255d64383e"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users", "create", [""], [""]);
-    operationConfigs["6d6677bd-e24e-4646-96aa-fcdedd20e367"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{id}", "read", [""], [""]);
-    operationConfigs["4adc63cd-646d-4edf-9601-69e2caf2230c"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{id}", "update", [""], [""]);
-    operationConfigs["d28171c3-1d94-48be-934a-6adf3a73ee90"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{id}", "delete", [""], [""]);
+    operationConfigs["7c2f331f-6117-4464-8bc7-7b8537876883"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users", "list", [""], [""]);
+    operationConfigs["a1f3d539-36eb-4ae5-b481-bce5d9f54ce5"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users", "create", [""], [""]);
+    operationConfigs["c607617d-d47a-48bf-b84e-932f3e34cee5"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{id}", "read", [""], [""]);
+    operationConfigs["3ba80ff7-df8f-4272-8e52-a140bb0211a3"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{id}", "update", [""], [""]);
+    operationConfigs["62e8b307-9a9f-438e-8e2f-c484f6de7813"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{id}", "delete", [""], [""]);
+    operationConfigs["61d19e5f-aba9-45d4-9440-2edb6b54b9ad"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users200/{id}", "delete", [""], [""]);
+    operationConfigs["949340ed-c938-489d-8f69-51fbdd916c75"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users204/{id}", "delete", [""], [""]);
     
 };
 
@@ -75,13 +77,11 @@ var _getOperationMetaData = function() {
  * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
  */
 User.list = function(params, callback) {
-    if (!MasterCardAPI.isSet(params)) {
-        params = {};
-    }
+    var params = MasterCardAPI.isSet(params) ? params : {};
 
     try {
         MasterCardAPI.execute({
-            operationConfig: _getOperationConfig("4f9b64d6-5982-450b-b3d6-6b785d739542"),
+            operationConfig: _getOperationConfig("7c2f331f-6117-4464-8bc7-7b8537876883"),
             operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
@@ -104,7 +104,7 @@ User.list = function(params, callback) {
 User.create = function(params, callback) {
     try {
         MasterCardAPI.execute({
-            operationConfig: _getOperationConfig("bb5fb29a-d79f-4e9c-823e-2f255d64383e"),
+            operationConfig: _getOperationConfig("a1f3d539-36eb-4ae5-b481-bce5d9f54ce5"),
             operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
@@ -126,11 +126,13 @@ User.create = function(params, callback) {
  */
 User.read = function(id, query, callback) {
     var params = MasterCardAPI.isSet(query) ? query : {};
-    params.id = id;
+    if (id) {
+        params.id = id;
+    }
 
     try {
         MasterCardAPI.execute({
-            operationConfig: _getOperationConfig("6d6677bd-e24e-4646-96aa-fcdedd20e367"),
+            operationConfig: _getOperationConfig("c607617d-d47a-48bf-b84e-932f3e34cee5"),
             operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
@@ -152,7 +154,7 @@ User.read = function(id, query, callback) {
 User.update = function(params, callback) {
     try {
         MasterCardAPI.execute({
-            operationConfig: _getOperationConfig("4adc63cd-646d-4edf-9601-69e2caf2230c"),
+            operationConfig: _getOperationConfig("3ba80ff7-df8f-4272-8e52-a140bb0211a3"),
             operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
@@ -175,11 +177,72 @@ User.update = function(params, callback) {
  */
 User.delete = function(id, map, callback) {
     var params = MasterCardAPI.isSet(map) ? map : {};
-    params.id = id;
+    if (id) {
+        params.id = id;
+    }
+
 
     try {
         MasterCardAPI.execute({
-            operationConfig: _getOperationConfig("d28171c3-1d94-48be-934a-6adf3a73ee90"),
+            operationConfig: _getOperationConfig("62e8b307-9a9f-438e-8e2f-c484f6de7813"),
+            operationMetaData: _getOperationMetaData(),
+            params: params
+        }, callback);
+    }
+    catch (e) {
+        callback(e, null);
+    }
+
+};
+    
+/**
+ * Function to delete a User object.
+ *
+ * @method delete
+ * @param {String} id - A string ID of the User to delete.
+ * @param {Object} map - a map of additional parameters
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+User.delete200 = function(id, map, callback) {
+    var params = MasterCardAPI.isSet(map) ? map : {};
+    if (id) {
+        params.id = id;
+    }
+
+
+    try {
+        MasterCardAPI.execute({
+            operationConfig: _getOperationConfig("61d19e5f-aba9-45d4-9440-2edb6b54b9ad"),
+            operationMetaData: _getOperationMetaData(),
+            params: params
+        }, callback);
+    }
+    catch (e) {
+        callback(e, null);
+    }
+
+};
+    
+/**
+ * Function to delete a User object.
+ *
+ * @method delete
+ * @param {String} id - A string ID of the User to delete.
+ * @param {Object} map - a map of additional parameters
+ * @param {Function} callback - A function to handle success/error responses from the API.<br/>
+ * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
+ */
+User.delete204 = function(id, map, callback) {
+    var params = MasterCardAPI.isSet(map) ? map : {};
+    if (id) {
+        params.id = id;
+    }
+
+
+    try {
+        MasterCardAPI.execute({
+            operationConfig: _getOperationConfig("949340ed-c938-489d-8f69-51fbdd916c75"),
             operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);

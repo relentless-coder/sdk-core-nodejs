@@ -36,9 +36,9 @@ var operationConfigs = {};
  * @private
  */
 var _init = function() {
-    operationConfigs["2097ebd3-5dd3-4987-ae0e-0dd05634899f"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{user_id}/post/{post_id}", "list", [""], [""]);
-    operationConfigs["ea76b836-59ee-401f-8b1e-54d91de37704"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{user_id}/post/{post_id}", "update", ["testQuery"], [""]);
-    operationConfigs["c7226817-f724-4f30-806c-3f9f4397eea2"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{user_id}/post/{post_id}", "delete", [""], [""]);
+    operationConfigs["6d3652d3-c91a-4452-86b8-fc3e939d86e1"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{user_id}/post/{post_id}", "list", [""], [""]);
+    operationConfigs["0b633454-4888-44f0-a80d-1b6955f990da"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{user_id}/post/{post_id}", "update", ["testQuery"], [""]);
+    operationConfigs["d97b9be8-902e-48b6-9236-08b1781a8441"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/{user_id}/post/{post_id}", "delete", [""], [""]);
     
 };
 
@@ -73,13 +73,11 @@ var _getOperationMetaData = function() {
  * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
  */
 MultiplePathUserPost.list = function(params, callback) {
-    if (!MasterCardAPI.isSet(params)) {
-        params = {};
-    }
+    var params = MasterCardAPI.isSet(params) ? params : {};
 
     try {
         MasterCardAPI.execute({
-            operationConfig: _getOperationConfig("2097ebd3-5dd3-4987-ae0e-0dd05634899f"),
+            operationConfig: _getOperationConfig("6d3652d3-c91a-4452-86b8-fc3e939d86e1"),
             operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
@@ -102,7 +100,7 @@ MultiplePathUserPost.list = function(params, callback) {
 MultiplePathUserPost.update = function(params, callback) {
     try {
         MasterCardAPI.execute({
-            operationConfig: _getOperationConfig("ea76b836-59ee-401f-8b1e-54d91de37704"),
+            operationConfig: _getOperationConfig("0b633454-4888-44f0-a80d-1b6955f990da"),
             operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);
@@ -125,11 +123,14 @@ MultiplePathUserPost.update = function(params, callback) {
  */
 MultiplePathUserPost.delete = function(id, map, callback) {
     var params = MasterCardAPI.isSet(map) ? map : {};
-    params.id = id;
+    if (id) {
+        params.id = id;
+    }
+
 
     try {
         MasterCardAPI.execute({
-            operationConfig: _getOperationConfig("c7226817-f724-4f30-806c-3f9f4397eea2"),
+            operationConfig: _getOperationConfig("d97b9be8-902e-48b6-9236-08b1781a8441"),
             operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);

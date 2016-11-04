@@ -192,7 +192,9 @@ MasterCardAPI.execute = function (opts, callback) {
                     var jsonResponse = null;
 
                     try {
-                        jsonResponse = JSON.parse(httpResponseData);
+                        if (httpResponseData && httpResponseData.length > 0) {
+                            jsonResponse = JSON.parse(httpResponseData);
+                        }
                     }
                     catch (e) {
                         console.error("Error parsing json response. Status: " + statusCode)
@@ -200,21 +202,18 @@ MasterCardAPI.execute = function (opts, callback) {
 
                     // NB: Don't want to call callback in catch above as if the callback function throws an error it
                     // will go back into the catch
-                    if (jsonResponse) {
-                        callback(null, jsonResponse);
-                    }
-                    else {
-                        callback(new mastercardError.APIError('Error parsing JSON response', httpResponseData, 500), null);
-                    }
+                    callback(null, jsonResponse);
                 }
                 else {
                     var error = httpResponseData;
 
                     try {
-                        error = JSON.parse(httpResponseData);
+                        if (httpResponseData && httpResponseData.length > 0) {
+                            error = JSON.parse(httpResponseData);
+                        }
                     }
                     catch (e) {
-                        console.error("Error parsing json response. Status: " + statusCode)
+                        console.error("Error parsing json-error response. Status: " + statusCode)
                     }
 
                     callback(new mastercardError.APIError('Error executing API call', error, statusCode), null);
