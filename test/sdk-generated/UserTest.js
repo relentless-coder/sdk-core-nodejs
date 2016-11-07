@@ -1,5 +1,5 @@
 // Imports for Test
-var sleep = require('thread-sleep');
+var sleep = require('sleep');
 var chai = require('chai');
 chai.use(require('chai-string'));
 var assert = chai.assert;
@@ -17,8 +17,6 @@ before(function() {
     
     
         it('list_users', function(done) {
-        
-
         
 
         var requestData = {};
