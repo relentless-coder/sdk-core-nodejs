@@ -36,7 +36,7 @@ var operationConfigs = {};
  * @private
  */
 var _init = function() {
-    operationConfigs["95d01027-a76d-4dc8-a76f-9d1e1a0d2ed5"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/posts", "list", [""], ["user_id"]);
+    operationConfigs["24e99f49-21f5-4781-80ad-1a2f1a1d8f12"] = new MasterCardAPI.OperationConfig("/mock_crud_server/users/posts", "list", [""], ["user_id"]);
     
 };
 
@@ -71,13 +71,11 @@ var _getOperationMetaData = function() {
  * The function takes 2 parameters, the first is an error object. This is null if no error occurs. The second parameter is the response data. This is null if an error occurs.
  */
 UserPostHeader.list = function(params, callback) {
-    if (!MasterCardAPI.isSet(params)) {
-        params = {};
-    }
+    var params = MasterCardAPI.isSet(params) ? params : {};
 
     try {
         MasterCardAPI.execute({
-            operationConfig: _getOperationConfig("95d01027-a76d-4dc8-a76f-9d1e1a0d2ed5"),
+            operationConfig: _getOperationConfig("24e99f49-21f5-4781-80ad-1a2f1a1d8f12"),
             operationMetaData: _getOperationMetaData(),
             params: params
         }, callback);

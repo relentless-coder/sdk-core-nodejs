@@ -46,7 +46,7 @@ describe('Post', function () {
     
     it('test Action.query from Post--> 200', function (done) {
         
-        Post.query({id: 1}, function (error, data) {
+        Post.read(null, {id: 1}, function (error, data) {
                 data.id.should.equal(1);
                 data.title.should.equal("My Title");
                 data.body.should.equal("some body text");
