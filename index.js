@@ -45,28 +45,15 @@ var https = require('https');
 var url = require('url');
 
 // Variables
-var sandbox = true;
 var authentication = null;
 var initialized = false;
+
+var subDomain = "sandbox";
+var environment = null;
+
 var debug = false;
 var test = false;
 var host = null;
-
-/**
- * Production URL
- *
- * @type {String}
- * @default Constants.API_BASE_PRODUCTION_URL value
- */
-MasterCardAPI.API_BASE_PRODUCTION_URL = constants.API_BASE_PRODUCTION_URL;
-
-/**
- * Sandbox URL
- *
- * @type {String}
- * @default Constants.API_BASE_SANDBOX_URL value
- */
-MasterCardAPI.API_BASE_SANDBOX_URL = constants.API_BASE_SANDBOX_URL;
 
 /**
  * Initialize the Core MasterCard API SDK
@@ -76,12 +63,31 @@ MasterCardAPI.API_BASE_SANDBOX_URL = constants.API_BASE_SANDBOX_URL;
  *  {Boolean} authentication - authentication object e.g. MasterCardAPI.OAuth
  */
 MasterCardAPI.init = function (opts) {
+    
+
+    //arizzini: backward compatible
     if (utils.isSet(opts.sandbox)) {
-        sandbox = opts.sandbox;
+        if (opts.sandbox == true) {
+            subDomain = "sandbox";
+        } else {
+            subDomain = null;
+        }
+    }
+    
+    //arizzini: new way to instanticate the subDomain
+    if (utils.isSet(opts.subDomain)) {
+        subDomain = opts.subDomain
+    }
+    
+    //arizzini: new way to instanticate the environment
+    if (utils.isSet(opts.environment)) {
+        environment = opts.environment
     }
     else {
-        sandbox = true;
+        environment = null;
     }
+    
+
     
     if (utils.isSet(opts.debug)) {
         debug = opts.debug;
@@ -97,15 +103,20 @@ MasterCardAPI.init = function (opts) {
     }
 
     // Check if a sandbox is true and update the API endpoint accordingly
-    if (sandbox) {
-        host = MasterCardAPI.API_BASE_SANDBOX_URL;
+    
+    var stringBuilder = [];
+    stringBuilder.push("https://");
+    if (subDomain) {
+        stringBuilder.push(subDomain);
+        stringBuilder.push(".");
     }
-    else {
-        host = MasterCardAPI.API_BASE_PRODUCTION_URL;
-    }
+    stringBuilder.push("api.mastercard.com");
+    host = stringBuilder.join("");
 
     initialized = true;
 };
+
+
 
 /**
  * Function to execute an API call.
@@ -313,13 +324,29 @@ function _checkState() {
  */
 function _getURI(params, operationConfig, operationMetaData) {
     var uri = host;
-
     if (utils.isSet(operationMetaData.host)) {
         uri = operationMetaData.host
     }
 
+
+    var resourcePath = operationConfig.path;
+    
+    if (resourcePath.indexOf("{:env}") > 0) {
+        //arizzini: we have found an envirment marker
+        var tmpEnvironment = "";
+        if (utils.isSet(operationMetaData.environment)) {
+            tmpEnvironment = operationMetaData.environment;
+        } else if (utils.isSet(environment)) {
+            tmpEnvironment = environment;
+        }
+        resourcePath = resourcePath.replace("{:env}", tmpEnvironment);
+        //arizzini: just in case we passig empty in the env which causes to form
+        //double forward slash in the url.
+        resourcePath = resourcePath.replace("//", "/");
+    }
+    
     // Modify URI to point to the correct API path
-    uri = uri + operationConfig.path;
+    uri = uri + resourcePath;
     
     // replace the path parameters
     uri = _replacePathParameters(uri, params);
@@ -509,12 +536,21 @@ if (typeof global.it === 'function') {
         return _getURI(params, operationConfig, operationMetaData);
     };
     
+    
+    MasterCardAPI.getHost = function() {
+        return host;
+    }
+    
+    MasterCardAPI.reset = function() {
+        subDomain = "sandbox";
+        environment = null;
+    }
+    
     MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam, operationMetaData) {
         return _getRequestOptions(httpMethod, uri, authHeader, headerParam, operationMetaData);
     };
     
     MasterCardAPI.testInit = function (opts) {
-
         test = true;
         sandbox = true;
         initialized = true;
