@@ -87,8 +87,6 @@ MasterCardAPI.init = function (opts) {
         environment = null;
     }
     
-
-    
     if (utils.isSet(opts.debug)) {
         debug = opts.debug;
     } else {
@@ -101,17 +99,6 @@ MasterCardAPI.init = function (opts) {
     else {
         throw new Error("Authentication must be set");
     }
-
-    // Check if a sandbox is true and update the API endpoint accordingly
-    
-    var stringBuilder = [];
-    stringBuilder.push("https://");
-    if (subDomain) {
-        stringBuilder.push(subDomain);
-        stringBuilder.push(".");
-    }
-    stringBuilder.push("api.mastercard.com");
-    host = stringBuilder.join("");
 
     initialized = true;
 };
@@ -304,6 +291,20 @@ function _checkState() {
     return true;
 }
 
+
+
+function generateHost() {
+    var stringBuilder = [];
+    stringBuilder.push("https://");
+    if (subDomain) {
+        stringBuilder.push(subDomain);
+        stringBuilder.push(".");
+    }
+    stringBuilder.push("api.mastercard.com");
+    return stringBuilder.join("");
+    
+}
+
 /**
  * Function to build up the URI endpoint to use in the request.
  *
@@ -323,7 +324,7 @@ function _checkState() {
  * @return {Object} Returns a URI object needed for a HTTP request
  */
 function _getURI(params, operationConfig, operationMetaData) {
-    var uri = host;
+    var uri = generateHost();
     if (utils.isSet(operationMetaData.host)) {
         uri = operationMetaData.host
     }
@@ -538,7 +539,7 @@ if (typeof global.it === 'function') {
     
     
     MasterCardAPI.getHost = function() {
-        return host;
+        return generateHost();
     }
     
     MasterCardAPI.reset = function() {
