@@ -41,9 +41,9 @@ ResourceConfig.getVersion = function() {
 
 ResourceConfig.setEnvironment = function(environment) {
 //    console.log("setEnvironment.... "+environment);
-    if (environment in constants.EnvironmentMapping) {
+    if (environment in constants.Mapping) {
         
-        var tuple = constants.EnvironmentMapping[environment];
+        var tuple = constants.Mapping[environment];
         _host = tuple[0];
         _context = tuple[1];
     } 
