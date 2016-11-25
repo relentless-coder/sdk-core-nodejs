@@ -31,6 +31,8 @@ var SdkConfig = require('./sdk-config');
 var UserPostPath = {};
 var operationConfigs = {};
 
+
+
 /**
  * Initialize UserPostPath
  * @private
