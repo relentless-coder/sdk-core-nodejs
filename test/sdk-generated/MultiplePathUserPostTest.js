@@ -1,5 +1,5 @@
 // Imports for Test
-var sleep = require('thread-sleep');
+var sleep = require('sleep');
 var chai = require('chai');
 chai.use(require('chai-string'));
 var assert = chai.assert;
@@ -19,7 +19,7 @@ before(function() {
         it('get_user_posts_with_mutplie_path', function(done) {
         
         
-        sleep(1000);
+        sleep.sleep(1);
         
 
         var requestData = {

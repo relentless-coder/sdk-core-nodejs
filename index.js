@@ -45,28 +45,13 @@ var https = require('https');
 var url = require('url');
 
 // Variables
-var sandbox = true;
 var authentication = null;
 var initialized = false;
+var registeredInstances = {};
+
 var debug = false;
 var test = false;
-var host = null;
-
-/**
- * Production URL
- *
- * @type {String}
- * @default Constants.API_BASE_PRODUCTION_URL value
- */
-MasterCardAPI.API_BASE_PRODUCTION_URL = constants.API_BASE_PRODUCTION_URL;
-
-/**
- * Sandbox URL
- *
- * @type {String}
- * @default Constants.API_BASE_SANDBOX_URL value
- */
-MasterCardAPI.API_BASE_SANDBOX_URL = constants.API_BASE_SANDBOX_URL;
+var environment = constants.Environment.SANDBOX;
 
 /**
  * Initialize the Core MasterCard API SDK
@@ -76,12 +61,23 @@ MasterCardAPI.API_BASE_SANDBOX_URL = constants.API_BASE_SANDBOX_URL;
  *  {Boolean} authentication - authentication object e.g. MasterCardAPI.OAuth
  */
 MasterCardAPI.init = function (opts) {
+    
+
+    //arizzini: backward compatible
     if (utils.isSet(opts.sandbox)) {
-        sandbox = opts.sandbox;
+        if (opts.sandbox == true) {
+            environment = constants.Environment.SANDBOX;
+        } else {
+            environment = constants.Environment.PRODUCTION;
+        }
+    } else if (utils.isSet(opts.environment)) {
+        environment = opts.environment;
+    } else {
+        environment = constants.Environment.SANDBOX;
     }
-    else {
-        sandbox = true;
-    }
+    
+    MasterCardAPI.setEnvironment(environment);
+    
     
     if (utils.isSet(opts.debug)) {
         debug = opts.debug;
@@ -96,16 +92,31 @@ MasterCardAPI.init = function (opts) {
         throw new Error("Authentication must be set");
     }
 
-    // Check if a sandbox is true and update the API endpoint accordingly
-    if (sandbox) {
-        host = MasterCardAPI.API_BASE_SANDBOX_URL;
-    }
-    else {
-        host = MasterCardAPI.API_BASE_PRODUCTION_URL;
-    }
-
     initialized = true;
 };
+
+MasterCardAPI.setEnvironment = function(env) {
+    for (var resourceConfigKey in registeredInstances) {
+        registeredInstances[resourceConfigKey].setEnvironment(env);
+    }
+    environment = env;
+}
+
+MasterCardAPI.registerResourceConfig = function(instance) {
+//    console.log("registerResourceConfig.... "+instance.getName());
+    if (! (instance.getName() in registeredInstances)) {
+//        console.log("registered.... ");
+        registeredInstances[instance.getName()] = instance;
+    }
+};
+
+MasterCardAPI.getEnvironment = function() {
+    return environment;
+};
+
+
+
+
 
 /**
  * Function to execute an API call.
@@ -293,6 +304,7 @@ function _checkState() {
     return true;
 }
 
+
 /**
  * Function to build up the URI endpoint to use in the request.
  *
@@ -312,14 +324,24 @@ function _checkState() {
  * @return {Object} Returns a URI object needed for a HTTP request
  */
 function _getURI(params, operationConfig, operationMetaData) {
-    var uri = host;
+    var uri = uri = operationMetaData.host
 
-    if (utils.isSet(operationMetaData.host)) {
-        uri = operationMetaData.host
+    var resourcePath = operationConfig.path;
+    
+    if (resourcePath.indexOf("{:env}") > 0) {
+        //arizzini: we have found an envirment marker
+        var tmpContext = "";
+        if (utils.isSet(operationMetaData.context)) {
+            tmpContext = operationMetaData.context;
+        }
+        resourcePath = resourcePath.replace("{:env}", tmpContext);
+        //arizzini: just in case we passig empty in the env which causes to form
+        //double forward slash in the url.
+        resourcePath = resourcePath.replace("//", "/");
     }
-
+    
     // Modify URI to point to the correct API path
-    uri = uri + operationConfig.path;
+    uri = uri + resourcePath;
     
     // replace the path parameters
     uri = _replacePathParameters(uri, params);
@@ -459,7 +481,7 @@ function _getRequestOptions(httpMethod, uri, authHeader, headerParam, operationM
         returnObj.headers[key] = headerParam[key];
     }
     
-    return returnObj
+    return returnObj;
     
 
 }
@@ -509,12 +531,24 @@ if (typeof global.it === 'function') {
         return _getURI(params, operationConfig, operationMetaData);
     };
     
+    MasterCardAPI.getRegisteredResourceConfigCount = function() {
+        return Object.keys(registeredInstances).length;
+    };
+    
+    MasterCardAPI.clearResourceConfig = function() {
+        registeredInstances = {};
+    };
+
+    
+    MasterCardAPI.reset = function() {
+        environment = constants.Environment.SANDBOX;
+    }
+    
     MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam, operationMetaData) {
         return _getRequestOptions(httpMethod, uri, authHeader, headerParam, operationMetaData);
     };
     
     MasterCardAPI.testInit = function (opts) {
-
         test = true;
         sandbox = true;
         initialized = true;

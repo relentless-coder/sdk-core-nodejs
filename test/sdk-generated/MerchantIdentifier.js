@@ -58,7 +58,7 @@ var _getOperationConfig = function(operationUUID) {
 };
 
 var _getOperationMetaData = function() {
-    return new MasterCardAPI.OperationMetaData(SdkConfig.getVersion(), null);
+    return new MasterCardAPI.OperationMetaData(SdkConfig.getVersion(), "https://sandbox.api.mastercard.com");
 };
 
     

@@ -8,7 +8,7 @@ var alias = "test";
 var password = "password";
 
 var operationConfig = new MasterCardAPI.OperationConfig("/fraud/loststolen/v1/account-inquiry", "update", [""], [""]);
-var operationMetaData = new MasterCardAPI.OperationMetaData("1.0.0", null);
+var operationMetaData = new MasterCardAPI.OperationMetaData("1.0.0", "https://sandbox.api.mastercard.com");
 
 describe('lostStolen', function() {
 
