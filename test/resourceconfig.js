@@ -5,8 +5,9 @@
  */
 
 
-var constants = require('../lib/constants');
+
 var MasterCardAPI = require('../index');
+var constants = require('../lib/constants');
 
 var ResourceConfig = {};
 
