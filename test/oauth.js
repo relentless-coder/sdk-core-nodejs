@@ -88,7 +88,7 @@ describe('OAuth', function() {
 
         var signature = oauth.sign(uri, httpMethod, body);
 
-        signature.should.equal("OAuth oauth_body_hash=\"udgDg+hDUuKNSliLHbL1PeZLCWo=\",oauth_consumer_key=\"abc\",oauth_nonce=\"12345678\",oauth_signature=\"OCoSeQRoWOJ5usZXvFEj06EULeVmFjootIS%2FAK3ALRauSJKP0GVofDFC7TvwnEEDc%2BlHpR5y5GFQulZoxfXO%2B3AJakoEbb2dGKQRWwSeYqmZ6B61oVx5y7m66RNDmN8SZPFAd55zhEBbCG55kejsBwTCmA6tN%2FhJu7hvEbcES8cnN0UICfkyEwe0y9JDGn8fNypA0keDbJPnxaAxl728Y6kDjJdNnX3vih28%2BhuhCeH6MYCdfLoNNWziLO6PH6pmAQ7KKrNtw5gTI7TRLpm3vScr1Qdx%2FPam4Zdur%2Bgjc6NFC7Ni2RU1MxicfRWS1BvuSkCMEsP%2Bnz7ZnSKx9Kgirw%3D%3D\",oauth_signature_method=\"RSA-SHA1\",oauth_timestamp=\"123\",oauth_version=\"1.0\"");
+        signature.should.equal("OAuth oauth_body_hash=\"udgDg+hDUuKNSliLHbL1PeZLCWo=\",oauth_consumer_key=\"abc\",oauth_nonce=\"12345678\",oauth_signature=\"LXvUWLRRjRutfUFMWeIvOKmyoX4TGEK4vqw1XUy7Kt%2BedPqm2jPM3qKvZEhH2e8FH1JPkK7g%2BrSkKV08wHTkxokVCfmL0I6xYysJpGsm8RaeNIMt9p%2BSZyp77Nrp5l0ZuzHz2VJ%2FdLjN2nERJOqrVumPHXTJg5sfis8eptEIMJptN23Shz2T9hBfFoW357lMLe9NVXpEKfxpJFVRwTzCzSqWijJ285hBwqo8%2B2lh7lK3uN4FcpRlp1sOmZ4dFuNLEi52RoP6qRFuDgvoZDTG2QOWfgztmIMm%2F%2Bu3ZhmNKmhSVkbBnrf2DYu%2B8QQWHLwi1RwrDVwC8wsoo164ncs3TA%3D%3D\",oauth_signature_method=\"RSA-SHA1\",oauth_timestamp=\"123\",oauth_version=\"1.0\"");
     });
 
 });

@@ -1,4 +1,6 @@
 var MasterCardAPI = require('../index');
+var ResourceConfig = require('./resourceconfig');
+var ResourceConfig2 = require('./resourceconfig');
 var Constants = require('../lib/constants');
 var OperationConfig = require('../lib/operation-config');
 var OperationMetaData = require('../lib/operation-metadata');
@@ -18,147 +20,123 @@ describe('MasterCardAPI before init', function() {
 
 });
 
-describe('MasterCardAPI check subdomains', function() {
+
+describe('MasterCardAPI check ResourceConfig singleton', function() {
     before(function() {
-
-
-    });
-    
-    it('default should to sandbox.api.mastercard.com', function () {
-        MasterCardAPI.reset();
-        MasterCardAPI.init({
-            authentication: {}
-        });
-        MasterCardAPI.getHost().should.equal("https://sandbox.api.mastercard.com")
-    });
-
-    it('sandbox=true should to sandbox.api.mastercard.com', function () {
-        MasterCardAPI.reset();
-        MasterCardAPI.init({
-            sandbox: true,
-            authentication: {}
-        });
-        MasterCardAPI.getHost().should.equal("https://sandbox.api.mastercard.com")
-    });
-    
-
-    it('sandbox=false should to api.mastercard.com', function () {
-        MasterCardAPI.reset();
-        MasterCardAPI.init({
-        sandbox: false,
-        authentication: {}
-        });
-        MasterCardAPI.getHost().should.equal("https://api.mastercard.com")
-    });
-    
-    it('sandbox="" should to sandbox.api.mastercard.com', function () {
-        MasterCardAPI.reset();
-        MasterCardAPI.init({
-        sandbox: "",
-        authentication: {}
-        });
-        MasterCardAPI.getHost().should.equal("https://sandbox.api.mastercard.com")
-    });
-    
-    
-    it('subDomain="" should to sandbox.api.mastercard.com', function () {
-        MasterCardAPI.reset();
-        MasterCardAPI.init({
-        subDomain: "",
-        authentication: {}
-        });
-        MasterCardAPI.getHost().should.equal("https://sandbox.api.mastercard.com")
-    });
-    
-    it('subDomain=sandbox should to sandbox.api.mastercard.com', function () {
-        MasterCardAPI.reset();
-        MasterCardAPI.init({
-        subDomain: "sandbox",
-        authentication: {}
-        });
-        MasterCardAPI.getHost().should.equal("https://sandbox.api.mastercard.com")
-    });
-    
-    it('subDomain=dev should to sandbox.api.mastercard.com', function () {
-        MasterCardAPI.reset();
-        MasterCardAPI.init({
-        subDomain: "dev",
-        authentication: {}
-        });
-        MasterCardAPI.getHost().should.equal("https://dev.api.mastercard.com")
-    });
-    
-    it('subDomain=stage should to sandbox.api.mastercard.com', function () {
-        MasterCardAPI.reset();
-        MasterCardAPI.init({
-        subDomain: "stage",
-        authentication: {}
-        });
-        MasterCardAPI.getHost().should.equal("https://stage.api.mastercard.com")
-    });
-
-});
-
-
-describe('MasterCardAPI check environments', function() {
-    before(function() {
-
     });
     
     it('dafault', function () {
-        MasterCardAPI.reset();
+        ResourceConfig.getHost().should.equal("https://sandbox.api.mastercard.com");
+        ResourceConfig.getHost().should.equal(ResourceConfig2.getHost());
+        MasterCardAPI.getRegisteredResourceConfigCount().should.equal(1)
+        
+    });
+    
+    it('change it to PRODUCTION', function () {
+        MasterCardAPI.setEnvironment(Constants.Environment.PRODUCTION)
+        ResourceConfig.getHost().should.equal("https://api.mastercard.com");
+        ResourceConfig.getHost().should.equal(ResourceConfig2.getHost());
+        
+    });
+    
+    it('change it to STAGE', function () {
+        MasterCardAPI.setEnvironment(Constants.Environment.STAGE)
+        ResourceConfig.getHost().should.equal("https://stage.api.mastercard.com");
+        ResourceConfig.getHost().should.equal(ResourceConfig2.getHost());
+        
+    });
+    
+    it('change it to DEV', function () {
+        MasterCardAPI.setEnvironment(Constants.Environment.DEV)
+        ResourceConfig.getHost().should.equal("https://dev.api.mastercard.com");
+        ResourceConfig.getHost().should.equal(ResourceConfig2.getHost());
+        
+    });
+    
+    it('change it to SANDBOX from sandbox:true', function () {
         MasterCardAPI.init({
             sandbox: true,
             authentication: {}
         });
-        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", null));
+        ResourceConfig.getHost().should.equal("https://sandbox.api.mastercard.com");
+        ResourceConfig.getHost().should.equal(ResourceConfig2.getHost());
+    });
+});
+
+describe('MasterCardAPI check environments', function() {
+    before(function() {
+        MasterCardAPI.getRegisteredResourceConfigCount().should.equal(1);
+    });
+    
+    it('sandbox:true', function () {
+        MasterCardAPI.getRegisteredResourceConfigCount().should.equal(1);
+        MasterCardAPI.init({
+            sandbox: true,
+            authentication: {}
+        });
+        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", ResourceConfig.getHost(), ResourceConfig.getContext()));
         replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/user/333/moneysend?Format=JSON");
     });
     
     
-    it('environment=""', function () {
-        MasterCardAPI.reset();
+    it('sandbox:false', function () {
+        MasterCardAPI.getRegisteredResourceConfigCount().should.equal(1);
         MasterCardAPI.init({
-            sandbox: true,
+            sandbox: false,
+            authentication: {}
+        });
+        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", ResourceConfig.getHost(), ResourceConfig.getContext()));
+        replacedUri.href.should.equal("https://api.mastercard.com/api/user/333/moneysend?Format=JSON");
+    });
+    
+
+    
+    
+    it('environment=""', function () {
+        MasterCardAPI.init({
             environment: "",
             authentication: {}
         });
-        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", null));
+        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", ResourceConfig.getHost(), ResourceConfig.getContext()));
         replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/user/333/moneysend?Format=JSON");
+    });
+    
+    it('environment=stage', function () {
+        MasterCardAPI.setEnvironment(Constants.Environment.STAGE);
+        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", ResourceConfig.getHost(), ResourceConfig.getContext()));
+        replacedUri.href.should.equal("https://stage.api.mastercard.com/api/user/333/moneysend?Format=JSON");
     });
     
         
     it('environment=mtf', function () {
-        MasterCardAPI.reset();
-        MasterCardAPI.init({
-            sandbox: true,
-            environment: "mtf",
-            authentication: {}
-        });
-        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", null));
+        MasterCardAPI.setEnvironment(Constants.Environment.MTF);
+        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", ResourceConfig.getHost(), ResourceConfig.getContext()));
         replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/mtf/user/333/moneysend?Format=JSON");
     });
     
     it('environment=itf', function () {
-        MasterCardAPI.reset();
-        MasterCardAPI.init({
-            sandbox: true,
-            environment: "itf",
-            authentication: {}
-        });
-        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", null));
+        MasterCardAPI.setEnvironment(Constants.Environment.ITF);
+        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", ResourceConfig.getHost(), ResourceConfig.getContext()));
         replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/itf/user/333/moneysend?Format=JSON");
     });
     
     
-    it('environment=itf via Operation', function () {
-        MasterCardAPI.reset();
+    it('environment=production via init', function () {
         MasterCardAPI.init({
-            sandbox: true,
+            environment: Constants.Environment.PRODUCTION,
             authentication: {}
         });
-        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", null, "itf"));
-        replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/itf/user/333/moneysend?Format=JSON");
+        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", ResourceConfig.getHost(), ResourceConfig.getContext()));
+        replacedUri.href.should.equal("https://api.mastercard.com/api/user/333/moneysend?Format=JSON");
+    });
+    
+        it('environment=sandbox via init', function () {
+        MasterCardAPI.init({
+            environment: Constants.Environment.SANDBOX,
+            authentication: {}
+        });
+        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/{:env}/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", ResourceConfig.getHost(), ResourceConfig.getContext()));
+        replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/user/333/moneysend?Format=JSON");
     });
     
     
@@ -172,10 +150,6 @@ describe('MasterCardAPI', function() {
             authentication: {}
         });
         
-    });
-
-    it('MasterCardAPI.host should equal Constants.API_BASE_PRODUCTION_URL', function () {
-        MasterCardAPI.getHost().should.equal(Constants.API_BASE_SANDBOX_URL)
     });
 
 
@@ -198,7 +172,7 @@ describe('MasterCardAPI', function() {
         var params = new Array();
         params['version'] = "1";
         params['user_id'] = "333";
-        var replacedUri = MasterCardAPI.getUri(params, new OperationConfig("/api/v{version}/user/{user_id}/moneysend", "create", [], []), new OperationMetaData("1.0.0", null));
+        var replacedUri = MasterCardAPI.getUri(params, new OperationConfig("/api/v{version}/user/{user_id}/moneysend", "create", [], []), new OperationMetaData("1.0.0", "https://sandbox.api.mastercard.com"));
         replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/v1/user/333/moneysend?Format=JSON");
         params.length.should.equal(0);
     });
@@ -209,7 +183,7 @@ describe('MasterCardAPI', function() {
         params['version'] = "1";
         params['user_id'] = "333";
         params['other'] = "aaa";
-        var replacedUri = MasterCardAPI.getUri(params, new OperationConfig("/api/v{version}/user/{user_id}/{other}", "create", [], []), new OperationMetaData("1.0.0", null));
+        var replacedUri = MasterCardAPI.getUri(params, new OperationConfig("/api/v{version}/user/{user_id}/{other}", "create", [], []), new OperationMetaData("1.0.0", "https://sandbox.api.mastercard.com"));
         replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/v1/user/333/aaa?Format=JSON");
         params.length.should.equal(0);
     });
@@ -220,7 +194,7 @@ describe('MasterCardAPI', function() {
             query_param: "query-param-value",
             body: "bodyValue"
         };
-        var replacedUri = MasterCardAPI.getUri(params, new OperationConfig("/api/user/{user_id}", "create", ['query_param'], []), new OperationMetaData("1.0.0", null));
+        var replacedUri = MasterCardAPI.getUri(params, new OperationConfig("/api/user/{user_id}", "create", ['query_param'], []), new OperationMetaData("1.0.0", "https://sandbox.api.mastercard.com"));
         replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/user/1?query_param=query-param-value&Format=JSON");
         should.exist(params.body);
         Object.keys(params).length.should.equal(1);
@@ -246,7 +220,7 @@ describe('MasterCardAPI', function() {
 
         var params = new Array();
         params['user_id'] = "333";
-        var replacedUri = MasterCardAPI.getUri(params, new OperationConfig("/api/user/{user_id}", "create", [], []), new OperationMetaData("1.0.0", null));
+        var replacedUri = MasterCardAPI.getUri(params, new OperationConfig("/api/user/{user_id}", "create", [], []), new OperationMetaData("1.0.0", "https://api.mastercard.com"));
         replacedUri.href.should.equal("https://api.mastercard.com/api/user/333?Format=JSON");
         params.length.should.equal(0);
     });

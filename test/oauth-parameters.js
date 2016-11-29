@@ -11,7 +11,7 @@ describe('OAuthParameters', function() {
         oauth.consumerKey = "mockConsumerKey";
         oauth.timeStamp.should.be.a.String;
         oauth.nonce.should.be.a.String;
-        oauth.signatureMethod.should.equal('RSA-SHA1');
+        oauth.signatureMethod.should.equal('RSA-SHA256');
         oauth.oauthVersion.should.equal('1.0');
         should.not.exist(oauth.bodyHash);
         oauth.signature.should.equal('');
@@ -47,7 +47,7 @@ describe('OAuthParameters', function() {
         oauth.generateBodyHash("abc");
 
         // http://approsto.com/sha-generator/
-        oauth.bodyHash.should.equal("qZk+NkcGgWq6PiVxeFDCbJzQ2J0=");
+        oauth.bodyHash.should.equal("ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=");
     });
 
     it('test parameter hash', function () {
@@ -55,9 +55,9 @@ describe('OAuthParameters', function() {
             oauth_consumer_key: "mockConsumerKey",
             oauth_timestamp: oauth.timeStamp.toString(),
             oauth_nonce: oauth.nonce,
-            oauth_signature_method: 'RSA-SHA1',
+            oauth_signature_method: 'RSA-SHA256',
             oauth_version: '1.0',
-            oauth_body_hash: "qZk+NkcGgWq6PiVxeFDCbJzQ2J0="
+            oauth_body_hash: "ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0="
         };
 
         var ret = oauth.generateParametersHash();
@@ -80,7 +80,7 @@ describe('OAuthParameters', function() {
             oauth_consumer_key: "mockConsumerKey",
             oauth_timestamp: oauth.timeStamp.toString(),
             oauth_nonce: oauth.nonce,
-            oauth_signature_method: 'RSA-SHA1',
+            oauth_signature_method: 'RSA-SHA256',
             oauth_version: '1.0'
         };
 
