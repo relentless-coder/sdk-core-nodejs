@@ -328,13 +328,13 @@ function _getURI(params, operationConfig, operationMetaData) {
 
     var resourcePath = operationConfig.path;
     
-    if (resourcePath.indexOf("{:env}") > 0) {
+    if (resourcePath.indexOf("#env") > 0) {
         //arizzini: we have found an envirment marker
         var tmpContext = "";
         if (utils.isSet(operationMetaData.context)) {
             tmpContext = operationMetaData.context;
         }
-        resourcePath = resourcePath.replace("{:env}", tmpContext);
+        resourcePath = resourcePath.replace("#env", tmpContext);
         //arizzini: just in case we passig empty in the env which causes to form
         //double forward slash in the url.
         resourcePath = resourcePath.replace("//", "/");
