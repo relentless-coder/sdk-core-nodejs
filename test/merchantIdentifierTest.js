@@ -67,7 +67,10 @@ describe('test MerchantIdentifier', function() {
         MerchantIdentifier.query(requestData
         , function (error, data) {
             if (error) {
-                error.status.should.equal(500);
+                error.getHttpStatus().should.equal(500);
+                error.getMessage().should.equal("Error executing API call");
+                error.getReasonCode().should.equal("DESCRIPTOR_NOT_FOUND");
+                error.getSource().should.equal("System");
             }
 
             //data.MerchantIds.Message.should.equal("7 merchants found.");

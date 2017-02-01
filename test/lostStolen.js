@@ -61,7 +61,11 @@ describe('lostStolen', function() {
             params: request
         },
         function (error, data) {
-            error.status.should.equal(400);
+            error.getHttpStatus().should.equal(400);
+            error.getMessage().should.equal("Unknown Error");
+            error.getReasonCode().should.equal("SYSTEM_ERROR");
+            error.getSource().should.equal("System");
+            
             done();
         });
 
