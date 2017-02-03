@@ -67,6 +67,9 @@ describe('test MerchantIdentifier', function() {
         MerchantIdentifier.query(requestData
         , function (error, data) {
             if (error) {
+                //console.log(error);
+                var source = error.rawErrorData.Errors.Error[0].Source;
+                source.should.equal("System");
                 error.getHttpStatus().should.equal(500);
                 error.getMessage().should.equal("Error executing API call");
                 error.getReasonCode().should.equal("DESCRIPTOR_NOT_FOUND");
