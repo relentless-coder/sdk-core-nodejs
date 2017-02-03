@@ -4,6 +4,7 @@ var ResourceConfig2 = require('./resourceconfig');
 var Constants = require('../lib/constants');
 var OperationConfig = require('../lib/operation-config');
 var OperationMetaData = require('../lib/operation-metadata');
+var Errors = require('../lib/error');
 
 // Imports for Test
 var should = require('should');
@@ -242,6 +243,77 @@ describe('MasterCardAPI', function () {
         returnObj.headers['user_id'].should.equal("333");
         returnObj.headers['partner_id'].should.equal("5465987412563");
 
+    });
+    
+    it('test APIException parsingObject', function () {
+        var errorData = {
+            "Errors": {
+                "Error": {
+                    "Source":"System",
+                    "ReasonCode":"METHOD_NOT_ALLOWED",
+                    "Description":"Method not Allowed",
+                    "Recoverable":"false"
+                }
+            }
+        };
+        
+        var error = new Errors.APIError("test message", errorData, 500);
+        var message = error.getMessage();
+        message.should.equal("Method not Allowed");
+        var reasonCode = error.getReasonCode();
+        reasonCode.should.equal("METHOD_NOT_ALLOWED");
+        var source = error.getSource();
+        source.should.equal("System");
+        
+        
+    });
+    
+    it('test APIException parsingObject case-insensitive', function () {
+        var errorData = {
+            "errors": {
+                "error": {
+                    "source":"System",
+                    "reasoncode":"METHOD_NOT_ALLOWED",
+                    "description":"Method not Allowed",
+                    "recoverable":"false"
+                }
+            }
+        };
+        
+        var error = new Errors.APIError("test message", errorData, 500);
+        var message = error.getMessage();
+        message.should.equal("Method not Allowed");
+        var reasonCode = error.getReasonCode();
+        reasonCode.should.equal("METHOD_NOT_ALLOWED");
+        var source = error.getSource();
+        source.should.equal("System");
+        
+        
+    });
+    
+    it('test APIException parsingObject with an error list', function () {
+        
+        var errorData = {
+            "Errors": {
+                "Error": [{
+                    "Source":"System",
+                    "ReasonCode":"METHOD_NOT_ALLOWED",
+                    "Description":"Method not Allowed",
+                    "Recoverable":"false"
+                }]
+            }
+        };
+       
+        
+       var error = new Errors.APIError("test message", errorData, 500);
+       var message = error.getMessage();
+       message.should.equal("Method not Allowed");
+       var reasonCode = error.getReasonCode();
+       reasonCode.should.equal("METHOD_NOT_ALLOWED");
+       var source = error.getSource();
+       source.should.equal("System");
+        
+        
     });
 
 });
