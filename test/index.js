@@ -315,5 +315,38 @@ describe('MasterCardAPI', function () {
         
         
     });
+    
+    
+        it('test APIException parsingObject with a json native error', function () {
+        
+        var errorData = {
+            "errors": [
+                {
+                 "source":"OpenAPIClientId",
+                 "reasonCode":"AUTHORIZATION_FAILED",
+                 "key":"050007",
+                 "description":"Unauthorized Access",
+                 "recoverable":false,
+                 "requestId":null,
+                 "details":{
+                     "details":[
+                         {"name":"ErrorDetailCode","value":"050007"}
+                     ]
+                 }
+                }
+            ]
+        };
+       
+        
+       var error = new Errors.APIError("test message", errorData, 500);
+       var message = error.getMessage();
+       message.should.equal("Unauthorized Access");
+       var reasonCode = error.getReasonCode();
+       reasonCode.should.equal("AUTHORIZATION_FAILED");
+       var source = error.getSource();
+       source.should.equal("OpenAPIClientId");
+        
+        
+    });
 
 });
