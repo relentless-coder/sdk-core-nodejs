@@ -79,6 +79,15 @@ describe('MasterCardAPI check environments', function () {
         replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/user/333/moneysend?Format=JSON");
     });
 
+    it('sandbox:false and isJsonNative', function () {
+        MasterCardAPI.getRegisteredResourceConfigCount().should.equal(1);
+        MasterCardAPI.init({
+            sandbox: false,
+            authentication: {}
+        });
+        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/#env/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", ResourceConfig.getHost(), ResourceConfig.getContext(), true));
+        replacedUri.href.should.equal("https://api.mastercard.com/api/user/333/moneysend");
+    });
 
     it('sandbox:false', function () {
         MasterCardAPI.getRegisteredResourceConfigCount().should.equal(1);
@@ -244,19 +253,19 @@ describe('MasterCardAPI', function () {
         returnObj.headers['partner_id'].should.equal("5465987412563");
 
     });
-    
+
     it('test APIException parsingObject', function () {
         var errorData = {
             "Errors": {
                 "Error": {
-                    "Source":"System",
-                    "ReasonCode":"METHOD_NOT_ALLOWED",
-                    "Description":"Method not Allowed",
-                    "Recoverable":"false"
+                    "Source": "System",
+                    "ReasonCode": "METHOD_NOT_ALLOWED",
+                    "Description": "Method not Allowed",
+                    "Recoverable": "false"
                 }
             }
         };
-        
+
         var error = new Errors.APIError("test message", errorData, 500);
         var message = error.getMessage();
         message.should.equal("Method not Allowed");
@@ -264,22 +273,22 @@ describe('MasterCardAPI', function () {
         reasonCode.should.equal("METHOD_NOT_ALLOWED");
         var source = error.getSource();
         source.should.equal("System");
-        
-        
+
+
     });
-    
+
     it('test APIException parsingObject case-insensitive', function () {
         var errorData = {
             "errors": {
                 "error": {
-                    "source":"System",
-                    "reasoncode":"METHOD_NOT_ALLOWED",
-                    "description":"Method not Allowed",
-                    "recoverable":"false"
+                    "source": "System",
+                    "reasoncode": "METHOD_NOT_ALLOWED",
+                    "description": "Method not Allowed",
+                    "recoverable": "false"
                 }
             }
         };
-        
+
         var error = new Errors.APIError("test message", errorData, 500);
         var message = error.getMessage();
         message.should.equal("Method not Allowed");
@@ -287,66 +296,66 @@ describe('MasterCardAPI', function () {
         reasonCode.should.equal("METHOD_NOT_ALLOWED");
         var source = error.getSource();
         source.should.equal("System");
-        
-        
+
+
     });
-    
+
     it('test APIException parsingObject with an error list', function () {
-        
+
         var errorData = {
             "Errors": {
                 "Error": [{
-                    "Source":"System",
-                    "ReasonCode":"METHOD_NOT_ALLOWED",
-                    "Description":"Method not Allowed",
-                    "Recoverable":"false"
-                }]
+                        "Source": "System",
+                        "ReasonCode": "METHOD_NOT_ALLOWED",
+                        "Description": "Method not Allowed",
+                        "Recoverable": "false"
+                    }]
             }
         };
-       
-        
-       var error = new Errors.APIError("test message", errorData, 500);
-       var message = error.getMessage();
-       message.should.equal("Method not Allowed");
-       var reasonCode = error.getReasonCode();
-       reasonCode.should.equal("METHOD_NOT_ALLOWED");
-       var source = error.getSource();
-       source.should.equal("System");
-        
-        
+
+
+        var error = new Errors.APIError("test message", errorData, 500);
+        var message = error.getMessage();
+        message.should.equal("Method not Allowed");
+        var reasonCode = error.getReasonCode();
+        reasonCode.should.equal("METHOD_NOT_ALLOWED");
+        var source = error.getSource();
+        source.should.equal("System");
+
+
     });
-    
-    
-        it('test APIException parsingObject with a json native error', function () {
-        
+
+
+    it('test APIException parsingObject with a json native error', function () {
+
         var errorData = {
             "errors": [
                 {
-                 "source":"OpenAPIClientId",
-                 "reasonCode":"AUTHORIZATION_FAILED",
-                 "key":"050007",
-                 "description":"Unauthorized Access",
-                 "recoverable":false,
-                 "requestId":null,
-                 "details":{
-                     "details":[
-                         {"name":"ErrorDetailCode","value":"050007"}
-                     ]
-                 }
+                    "source": "OpenAPIClientId",
+                    "reasonCode": "AUTHORIZATION_FAILED",
+                    "key": "050007",
+                    "description": "Unauthorized Access",
+                    "recoverable": false,
+                    "requestId": null,
+                    "details": {
+                        "details": [
+                            {"name": "ErrorDetailCode", "value": "050007"}
+                        ]
+                    }
                 }
             ]
         };
-       
-        
-       var error = new Errors.APIError("test message", errorData, 500);
-       var message = error.getMessage();
-       message.should.equal("Unauthorized Access");
-       var reasonCode = error.getReasonCode();
-       reasonCode.should.equal("AUTHORIZATION_FAILED");
-       var source = error.getSource();
-       source.should.equal("OpenAPIClientId");
-        
-        
+
+
+        var error = new Errors.APIError("test message", errorData, 500);
+        var message = error.getMessage();
+        message.should.equal("Unauthorized Access");
+        var reasonCode = error.getReasonCode();
+        reasonCode.should.equal("AUTHORIZATION_FAILED");
+        var source = error.getSource();
+        source.should.equal("OpenAPIClientId");
+
+
     });
 
 });

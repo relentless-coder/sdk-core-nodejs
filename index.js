@@ -370,7 +370,9 @@ function _getURI(params, operationConfig, operationMetaData) {
     }
 
     // Add Format=JSON
-    uri = _appendMapToQueryString(uri, { Format: "JSON" });
+    if (operationMetaData.jsonNative == false) {
+        uri = _appendMapToQueryString(uri, { Format: "JSON" });
+    }
     
     // Use node js 'url' module to create URI object
     return url.parse(uri);
@@ -469,10 +471,10 @@ function _getRequestOptions(httpMethod, uri, authHeader, headerParam, operationM
         path: uri.path,
         method: httpMethod,
         headers: {
-            "Accept": "application/json",
+            "Accept": "application/json; charset=utf-8",
             "Authorization": authHeader,
-            "Content-Type": "application/json",
-            "User-Agent": "NodeJS-Core-SDK/" + constants.VERSION + "; NodeJS-SDK/" + operationMetaData.version
+            "Content-Type": "application/json; charset=utf-8",
+            "User-Agent": constants.getCoreVersion()+"/" + operationMetaData.version
         }
     };
     
