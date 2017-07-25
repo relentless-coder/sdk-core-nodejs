@@ -8,6 +8,7 @@ var Errors = require('../lib/error');
 
 // Imports for Test
 var should = require('should');
+var assert = require('chai').assert;
 
 describe('MasterCardAPI before init', function () {
     it('execute with no init returns error in callback', function () {
@@ -233,9 +234,11 @@ describe('MasterCardAPI', function () {
         var replacedUri = MasterCardAPI.getUri(params, new OperationConfig("/api/user/{user_id}", "create", [], []), new OperationMetaData("1.0.0", "https://api.mastercard.com"));
         replacedUri.href.should.equal("https://api.mastercard.com/api/user/333?Format=JSON");
         params.length.should.equal(0);
+        
+        
     });
 
-    it('test _getRequestOptions with header parameter ', function () {
+    it('test _getRequestOptions GET with header parameter ', function () {
         var headerParam = new Array();
         headerParam['version'] = "1";
         headerParam['user_id'] = "333";
@@ -246,11 +249,39 @@ describe('MasterCardAPI', function () {
         var uri = "/api/v1/user/333/aaa?Format=JSON";
         var authHeader = "blablablablablabla";
 
-        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, authHeader, headerParam, new OperationMetaData("1.0.0", null));
+        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, null, authHeader, headerParam, new OperationMetaData("mock:1.0.0", null));
 
         returnObj.headers['version'].should.equal("1");
         returnObj.headers['user_id'].should.equal("333");
         returnObj.headers['partner_id'].should.equal("5465987412563");
+        
+        assert.isUndefined(returnObj.headers['Content-Type']);
+        assert.isDefined(returnObj.headers['Accept']);
+        returnObj.headers['User-Agent'].should.equal("NodeJS_SDK:1.4.1/mock:1.0.0");
+
+    });
+    
+    
+    it('test _getRequestOptions POST with header parameter ', function () {
+        var headerParam = new Array();
+        headerParam['version'] = "1";
+        headerParam['user_id'] = "333";
+        headerParam['partner_id'] = "5465987412563";
+
+        //httpMethod, uri, authHeader, headerParam
+        var httpMethod = "GET";
+        var uri = "/api/v1/user/333/aaa?Format=JSON";
+        var authHeader = "blablablablablabla";
+
+        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, "{}", authHeader, headerParam, new OperationMetaData("mock:1.0.0", null));
+
+        returnObj.headers['version'].should.equal("1");
+        returnObj.headers['user_id'].should.equal("333");
+        returnObj.headers['partner_id'].should.equal("5465987412563");
+        
+        assert.isDefined(returnObj.headers['Content-Type']);
+        assert.isDefined(returnObj.headers['Accept']);
+        returnObj.headers['User-Agent'].should.equal("NodeJS_SDK:1.4.1/mock:1.0.0");
 
     });
 

@@ -142,11 +142,11 @@ MasterCardAPI.execute = function (opts, callback) {
 
         uri = _getURI(params, operationConfig, operationMetaData);
         httpMethod = _getHttpMethod(operationConfig.action);
-        var body = JSON.stringify(params);
-        var authHeader = authentication.sign(uri, httpMethod, body);
         
+        var body = _isEmpty(params) === false ? JSON.stringify(params) : null;
+        var authHeader = authentication.sign(uri, httpMethod, body)
         
-        var requestOptions = _getRequestOptions(httpMethod, uri, authHeader, headerParams, operationMetaData);
+        var requestOptions = _getRequestOptions(httpMethod, uri, body, authHeader, headerParams, operationMetaData);
         
         if (debug) {
             console.log( "---- Request ----");
@@ -463,19 +463,27 @@ var _appendQueryString = function(uri, key, value) {
  *
  * @returns request options map
  */
-function _getRequestOptions(httpMethod, uri, authHeader, headerParam, operationMetaData) {
+function _getRequestOptions(httpMethod, uri, body, authHeader, headerParam, operationMetaData) {
 
+    var withBodyHeaders = {
+            "Accept": "application/json; charset=utf-8",
+            "Authorization": authHeader,
+            "Content-Type": "application/json; charset=utf-8",
+            "User-Agent": constants.getCoreVersion()+"/" + operationMetaData.version
+        };
+    
+    var withoutBodyHeaders = {
+            "Accept": "application/json; charset=utf-8",
+            "Authorization": authHeader,
+            "User-Agent": constants.getCoreVersion()+"/" + operationMetaData.version
+        };
+    
     var returnObj = {
         host: uri.hostname,
         port: uri.port,
         path: uri.path,
         method: httpMethod,
-        headers: {
-            "Accept": "application/json; charset=utf-8",
-            "Authorization": authHeader,
-            "Content-Type": "application/json; charset=utf-8",
-            "User-Agent": constants.getCoreVersion()+"/" + operationMetaData.version
-        }
+        headers: (body) ? withBodyHeaders : withoutBodyHeaders
     };
     
     // need to add the additional headers
@@ -486,6 +494,11 @@ function _getRequestOptions(httpMethod, uri, authHeader, headerParam, operationM
     return returnObj;
     
 
+}
+
+
+function _isEmpty(obj) {
+  return Object.keys(obj).length === 0;
 }
 
 /**
@@ -546,8 +559,8 @@ if (typeof global.it === 'function') {
         environment = constants.Environment.SANDBOX;
     }
     
-    MasterCardAPI.getRequestOptions = function (httpMethod, uri, authHeader, headerParam, operationMetaData) {
-        return _getRequestOptions(httpMethod, uri, authHeader, headerParam, operationMetaData);
+    MasterCardAPI.getRequestOptions = function (httpMethod, uri, body, authHeader, headerParam, operationMetaData) {
+        return _getRequestOptions(httpMethod, uri, body,authHeader, headerParam, operationMetaData);
     };
     
     MasterCardAPI.testInit = function (opts) {
@@ -562,6 +575,7 @@ if (typeof global.it === 'function') {
 
     // END EXPOSE PRIVATE FUNCTION FOR TESTING
 }
+
 
 
 
