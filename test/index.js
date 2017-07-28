@@ -257,7 +257,7 @@ describe('MasterCardAPI', function () {
         
         assert.isUndefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("NodeJS_SDK:1.4.1/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.1/mock:1.0.0");
 
     });
     
@@ -281,7 +281,7 @@ describe('MasterCardAPI', function () {
         
         assert.isDefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("NodeJS_SDK:1.4.1/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.1/mock:1.0.0");
 
     });
 
