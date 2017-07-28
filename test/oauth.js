@@ -69,7 +69,7 @@ describe('OAuth', function() {
         oauth.consumerKey.should.equal(consumerKey);
     });
 
-    it('sign', function() {
+    it('sign POST', function() {
         var uri = url.parse("https://sandbox.mastercard.com/api/mock?Format=JSON");
         var httpMethod = "POST";
         var body = JSON.stringify({a: "a", b: 1, c: true});
@@ -89,6 +89,29 @@ describe('OAuth', function() {
         var signature = oauth.sign(uri, httpMethod, body);
 
         signature.should.equal("OAuth oauth_body_hash=\"udgDg+hDUuKNSliLHbL1PeZLCWo=\",oauth_consumer_key=\"abc\",oauth_nonce=\"12345678\",oauth_signature=\"LXvUWLRRjRutfUFMWeIvOKmyoX4TGEK4vqw1XUy7Kt%2BedPqm2jPM3qKvZEhH2e8FH1JPkK7g%2BrSkKV08wHTkxokVCfmL0I6xYysJpGsm8RaeNIMt9p%2BSZyp77Nrp5l0ZuzHz2VJ%2FdLjN2nERJOqrVumPHXTJg5sfis8eptEIMJptN23Shz2T9hBfFoW357lMLe9NVXpEKfxpJFVRwTzCzSqWijJ285hBwqo8%2B2lh7lK3uN4FcpRlp1sOmZ4dFuNLEi52RoP6qRFuDgvoZDTG2QOWfgztmIMm%2F%2Bu3ZhmNKmhSVkbBnrf2DYu%2B8QQWHLwi1RwrDVwC8wsoo164ncs3TA%3D%3D\",oauth_signature_method=\"RSA-SHA1\",oauth_timestamp=\"123\",oauth_version=\"1.0\"");
+    });
+    
+    
+    it('sign GET', function() {
+        var uri = url.parse("https://sandbox.mastercard.com/api/mock?Format=JSON");
+        var httpMethod = "GET";
+        var body = null;
+
+        var oauth = new OAuth(consumerKey, p12Path, alias, password);
+
+        // Mocking
+
+        // given
+        var userServiceMock = require("./mock/mock-oauth-parameters");
+
+        OAuth.__set__({
+            'OAuthParameters': userServiceMock
+        });
+        // Mocking
+
+        var signature = oauth.sign(uri, httpMethod, body);
+
+        signature.should.equal("OAuth oauth_consumer_key=\"abc\",oauth_nonce=\"12345678\",oauth_signature=\"WpJjkp6vkOypd93ny12gfBmrlqAYpJoMLy5BXnvfGeQmyqim8ob%2BqN9bZNHgFFqGgP3QfKCSjslkvVc%2FKYk756ZUXxWV0wNznUFPhqmub0xyWQffzwWskvWPChThAp4u9m8%2BdItG98qjdslth5jmJbFH84PryvVh0mSBQIocluLKTzEZhDpY%2FxAzygam8ppRcwf0gDdKqZWQEVzT4pQ2KdaDFeNbYud%2FitquclLUeI%2BnjEEzqk8hsxX2MavPlEVdI2EkpDRvaAhd%2FmAFIbHif%2BUtQRa9A1ZfJQYpLIwjfiwmxqakWMn6tn7Opgt6d7Fd2O4KX%2BI8EnLaAM4YOcKZRw%3D%3D\",oauth_signature_method=\"RSA-SHA1\",oauth_timestamp=\"123\",oauth_version=\"1.0\"");
     });
 
 });
