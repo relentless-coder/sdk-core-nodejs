@@ -12,13 +12,70 @@ var operationMetaData = new MasterCardAPI.OperationMetaData("1.0.0", "https://sa
 
 describe('lostStolen', function() {
 
-    it('send valid request', function(done){
+    beforeEach( function() {
         var authentication = new MasterCardAPI.OAuth(clientId, p12Path, alias, password);
 
         MasterCardAPI.init({
             sandbox: true,
             authentication: authentication
         });
+    });
+
+    afterEach( function() {
+        MasterCardAPI.setProxy(null);
+    });
+
+    it('send valid request', function(done){
+        
+
+        var request = {
+            "AccountInquiry": {
+                "AccountNumber": "5343434343434343"
+            }
+        };
+
+        MasterCardAPI.execute({
+            operationConfig: operationConfig,
+            operationMetaData: operationMetaData,
+            params: request
+        },
+        function (error, data) {
+            data.Account.Status.should.equal(true);
+            data.Account.Listed.should.equal(true);
+            data.Account.ReasonCode.should.equal("S");
+            data.Account.Reason.should.equal("STOLEN");
+            done();
+        });
+
+    });
+
+
+    it('send valid request with proxy', function(done){
+        
+        MasterCardAPI.setProxy("http://127.0.0.1:9999");
+
+        var request = {
+            "AccountInquiry": {
+                "AccountNumber": "5343434343434343"
+            }
+        };
+
+        MasterCardAPI.execute({
+            operationConfig: operationConfig,
+            operationMetaData: operationMetaData,
+            params: request
+        },
+        function (error, data) {
+            data.Account.Status.should.equal(true);
+            data.Account.Listed.should.equal(true);
+            data.Account.ReasonCode.should.equal("S");
+            data.Account.Reason.should.equal("STOLEN");
+            done();
+        });
+
+    });
+
+    it('send valid request', function(done){
 
         var request = {
             "AccountInquiry": {
@@ -42,12 +99,7 @@ describe('lostStolen', function() {
     });
 
     it('send error request', function(done){
-        var authentication = new MasterCardAPI.OAuth(clientId, p12Path, alias, password);
 
-        MasterCardAPI.init({
-            sandbox: true,
-            authentication: authentication
-        });
 
         var request = {
             "AccountInquiry": {

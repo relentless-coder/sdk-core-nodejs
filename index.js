@@ -40,8 +40,7 @@ var oauth = require("./lib/security/oauth/oauth");
 var operationConfig = require("./lib/operation-config");
 var operationMetaData = require("./lib/operation-metadata");
 var utils = require("./lib/utils");
-var http = require('http');
-var https = require('https');
+var request = require('request');
 var url = require('url');
 
 // Variables
@@ -49,6 +48,7 @@ var authentication = null;
 var initialized = false;
 var registeredInstances = {};
 
+var proxy = null;
 var debug = false;
 var test = false;
 var environment = constants.Environment.SANDBOX;
@@ -85,6 +85,11 @@ MasterCardAPI.init = function (opts) {
         debug = false;
     }
 
+    if (utils.isSet(opts.proxy)) {
+        proxy = opts.proxy;
+    }
+
+
     if (utils.isSet(opts.authentication)) {
         authentication = opts.authentication;
     }
@@ -101,6 +106,15 @@ MasterCardAPI.setEnvironment = function(env) {
     }
     environment = env;
 }
+
+MasterCardAPI.setProxy = function(proxyHost) {
+    if (utils.isSet(proxyHost)) {
+        proxy = proxyHost;
+    } else {
+        proxy = null;
+    }
+}
+
 
 MasterCardAPI.registerResourceConfig = function(instance) {
 //    console.log("registerResourceConfig.... "+instance.getName());
@@ -137,7 +151,6 @@ MasterCardAPI.execute = function (opts, callback) {
         var operationMetaData = opts.operationMetaData;
         var params = opts.params;
         var headerParams = utils.subMap(params, operationConfig.headerParams);
-
         var uri, httpMethod;
 
         uri = _getURI(params, operationConfig, operationMetaData);
@@ -163,103 +176,65 @@ MasterCardAPI.execute = function (opts, callback) {
 
         }
         
-        protocol = http;
-        if (uri.protocol === "https:") {
-            protocol = https;
-        }
+        request(requestOptions, function (err, res, body) {
 
-        // Exec async API HTTP request
-        var httpRequest = protocol.request(requestOptions, function (httpResponse) {
-            
-            var httpResponseData = "";
+            if (err) {
+                // Catch our timeout error thrown below
+                if (err.code === "ECONNRESET") {
+                    callback(new mastercardError.APIError('The API request has timed out', err, null), null);
+                } else if (err.code === "ECONNREFUSED") {
+                    callback(new mastercardError.APIError('The API server refused the connection', err, null), null);
+                } else if (err.code === 'ETIMEDOUT') {
+                    callback(new mastercardError.APIError('The API server connection timeout', err, null), null);
+                } else {
+                    callback(new mastercardError.APIError('Error executing API call', err, null), null);
+                }
+            } else {
 
-            httpResponse.setEncoding('utf8');
-
-            // Handle successful response
-            httpResponse.on('data', function (data) {
-                httpResponseData += data;
-            });
-
-            httpResponse.on('end', function () {
-
-                var statusCode = httpResponse.statusCode
-                
+                var statusCode = res.statusCode
                 if (debug) {
                     console.log( "---- Response ----");
                     console.log( "Statis");
                     console.log( statusCode);
                     console.log( "");
                     console.log( "Headers");
-                    console.log( JSON.stringify(httpResponse.headers) );
+                    console.log( JSON.stringify(res.headers) );
                     console.log( "");
                     console.log( "Body" );
-                    console.log( httpResponseData );
+                    console.log( body );
                     console.log( "------------------");
                     console.log( "");
                 }
-                
 
                 if (statusCode < 300) {
-                    var jsonResponse = null;
+                    var parsedResponse = body;
 
                     try {
-                        if (httpResponseData && httpResponseData.length > 0) {
-                            jsonResponse = JSON.parse(httpResponseData);
+                        if (body && body.length > 0) {
+                            parsedResponse = JSON.parse(body);
                         }
                     }
                     catch (e) {
                         console.error("Error parsing json response. Status: " + statusCode)
+                        
                     }
-
                     // NB: Don't want to call callback in catch above as if the callback function throws an error it
                     // will go back into the catch
-                    callback(null, jsonResponse);
-                }
-                else {
-                    var error = httpResponseData;
-
+                    callback(null, parsedResponse);
+                } else {
+                    var parsedResponse = body;
                     try {
-                        if (httpResponseData && httpResponseData.length > 0) {
-                            error = JSON.parse(httpResponseData);
+                        if (body && body.length > 0) {
+                            parsedResponse = JSON.parse(body);
                         }
                     }
                     catch (e) {
                         console.error("Error parsing json-error response. Status: " + statusCode)
                     }
-
-                    callback(new mastercardError.APIError('Error executing API call', error, statusCode), null);
+                    callback(new mastercardError.APIError('Error executing API call', parsedResponse, statusCode), null);
                 }
-            });
-        }).on('error', function (errorResponse) {
-
-            var errorStatusCode = errorResponse.statusCode
-
-            // Catch our timeout error thrown below
-            if (errorResponse.code === "ECONNRESET") {
-                callback(new mastercardError.APIError('The API request has timed out', errorResponse, errorStatusCode), null);
-            } else if (errorResponse.code === "ECONNREFUSED") {
-                callback(new mastercardError.APIError('The API server refused the connection', errorResponse, errorStatusCode), null);
-            } else {
-                callback(new mastercardError.APIError('Error executing API call', errorResponse, errorStatusCode), null);
             }
-            // Return error from API call
-            
-        }).on('socket', function (socket) {
-
-            // Set timeout on the HTTP request
-            socket.setTimeout(30000);
-            socket.on('timeout', function () {
-                // Killing the request which throws an Error and is caught above in the error block
-                httpRequest.abort();
-            });
-        }); 
-
-        // If POST request, then write to the body of the request
-        if (requestOptions.method === "POST" || requestOptions.method === "PUT") {
-            httpRequest.write(body);
-        }
-
-        httpRequest.end();
+        });
     }
     catch(e) {
         callback(e, null);
@@ -465,34 +440,34 @@ var _appendQueryString = function(uri, key, value) {
  */
 function _getRequestOptions(httpMethod, uri, body, authHeader, headerParam, operationMetaData) {
 
-    var withBodyHeaders = {
-            "Accept": "application/json; charset=utf-8",
-            "Authorization": authHeader,
-            "Content-Type": "application/json; charset=utf-8",
-            "User-Agent": constants.getCoreVersion()+"/" + operationMetaData.version
-        };
-    
-    var withoutBodyHeaders = {
-            "Accept": "application/json; charset=utf-8",
-            "Authorization": authHeader,
-            "User-Agent": constants.getCoreVersion()+"/" + operationMetaData.version
-        };
-    
-    var returnObj = {
-        host: uri.hostname,
-        port: uri.port,
-        path: uri.path,
-        method: httpMethod,
-        headers: (body) ? withBodyHeaders : withoutBodyHeaders
-    };
-    
-    // need to add the additional headers
+    var headersDict = {
+             "Accept": "application/json; charset=utf-8",
+             "Authorization": authHeader,
+             "User-Agent": constants.getCoreVersion()+"/" + operationMetaData.version
+     };
+
+    // arizzini: need to add the additional headers
     for (var key in headerParam) {
-        returnObj.headers[key] = headerParam[key];
+        headersDict[key] = headerParam[key];
     }
-    
+
+    var returnObj = {
+            uri: uri,
+            method: httpMethod,
+            encoding: "utf8",
+            headers: headersDict
+        };
+
+    if (body) {
+        returnObj["body"] = body;
+        returnObj.headers["Content-Type"] = "application/json; charset=utf-8";
+    }
+    //arizzini: addding the proxy info
+    if (proxy) {
+        returnObj["proxy"] = proxy;
+    }
+
     return returnObj;
-    
 
 }
 
@@ -553,7 +528,6 @@ if (typeof global.it === 'function') {
     MasterCardAPI.clearResourceConfig = function() {
         registeredInstances = {};
     };
-
     
     MasterCardAPI.reset = function() {
         environment = constants.Environment.SANDBOX;
@@ -571,7 +545,9 @@ if (typeof global.it === 'function') {
         
     };
 
-
+    MasterCardAPI.getProxy = function() {
+        return proxy;
+    };
 
     // END EXPOSE PRIVATE FUNCTION FOR TESTING
 }

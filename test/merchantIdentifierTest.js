@@ -20,36 +20,36 @@ var password = "password";
 describe('test MerchantIdentifier', function() {
     
     
-//    it('test merchant-identifier.MICROSOFT', function(done) {
-//
-//        var authentication = new MasterCardAPI.OAuth(clientId, p12Path, alias, password);
-//
-//        MasterCardAPI.init({
-//            sandbox: true,
-//            debug: false,
-//            authentication: authentication
-//        });
-//        
-//        var requestData = {
-//            "MerchantId": "MICROSOFT",
-//            "Type": "FuzzyMatch"
-//        };
-//
-//        MerchantIdentifier.query(requestData
-//        , function (error, data) {
-//            if (error) {
-//                console.log(error);
-//                throw error;
-//            }
-//
-//            data.MerchantIds.Message.should.equal("7 merchants found.");
-//            done();
-//        });
-//    });
+   it('test merchant-identifier.MICROSOFT', function(done) {
+
+       var authentication = new MasterCardAPI.OAuth(clientId, p12Path, alias, password);
+
+       MasterCardAPI.init({
+           sandbox: true,
+           debug: false,
+           authentication: authentication
+       });
+       
+       var requestData = {
+           "MerchantId": "MICROSOFT",
+           "Type": "FuzzyMatch"
+       };
+
+       MerchantIdentifier.query(requestData
+       , function (error, data) {
+           if (error) {
+               console.log(error);
+               throw error;
+           }
+
+           data.MerchantIds.Message.should.equal("7 merchants found.");
+           done();
+       });
+   });
     
     
     
-        it('test merchant-identifier.GOOGLE', function(done) {
+    it('test merchant-identifier.GOOGLE', function(done) {
 
         var authentication = new MasterCardAPI.OAuth(clientId, p12Path, alias, password);
 
@@ -67,11 +67,10 @@ describe('test MerchantIdentifier', function() {
         MerchantIdentifier.query(requestData
         , function (error, data) {
             if (error) {
-                //console.log(error);
-                var source = error.rawErrorData.Errors.Error[0].Source;
+                var source = error.rawErrorData.Errors.Error.Source;
                 source.should.equal("System");
                 error.getHttpStatus().should.equal(500);
-                error.getMessage().should.equal("Error executing API call");
+                error.getMessage().should.equal("No match found. Please enter the Transaction Descriptor exactly as it appears on the statement.");
                 error.getReasonCode().should.equal("DESCRIPTOR_NOT_FOUND");
                 error.getSource().should.equal("System");
             }

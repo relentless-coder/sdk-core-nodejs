@@ -22,6 +22,34 @@ describe('MasterCardAPI before init', function () {
 
 });
 
+describe('MasterCardAPI test setting proxy config and clear', function() {
+
+
+    after(function() {
+        MasterCardAPI.setProxy(null);
+    })
+
+
+    it('test setting proxy via contructor', function () {
+        
+        MasterCardAPI.init({
+            sandbox: true,
+            authentication: {},
+            proxy: "http://127.0.0.1:9999"
+        });
+
+        MasterCardAPI.getProxy().should.equal("http://127.0.0.1:9999");
+
+    });
+
+    it('test setting proxy via method', function () {
+        MasterCardAPI.setProxy("http://192.168.0.1:10000");
+        MasterCardAPI.getProxy().should.equal("http://192.168.0.1:10000");
+
+    });
+});
+
+
 
 describe('MasterCardAPI check ResourceConfig singleton', function () {
     before(function () {
@@ -238,6 +266,14 @@ describe('MasterCardAPI', function () {
         
     });
 
+});
+
+describe('MasterCardAPI getRequestOptions', function () {
+
+    afterEach(function () {
+        MasterCardAPI.setProxy(null);
+    })
+
     it('test _getRequestOptions GET with header parameter ', function () {
         var headerParam = new Array();
         headerParam['version'] = "1";
@@ -285,6 +321,35 @@ describe('MasterCardAPI', function () {
 
     });
 
+    it('test _getRequestOptions POST with proxy ', function () {
+
+        MasterCardAPI.setProxy("http://andrea.rizzini:9999");
+
+        var headerParam = new Array();
+        headerParam['version'] = "1";
+        headerParam['user_id'] = "333";
+        headerParam['partner_id'] = "5465987412563";
+
+        //httpMethod, uri, authHeader, headerParam
+        var httpMethod = "GET";
+        var uri = "/api/v1/user/333/aaa?Format=JSON";
+        var authHeader = "blablablablablabla";
+
+        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, "{}", authHeader, headerParam, new OperationMetaData("mock:1.0.0", null));
+
+        returnObj.headers['version'].should.equal("1");
+        returnObj.headers['user_id'].should.equal("333");
+        returnObj.headers['partner_id'].should.equal("5465987412563");
+        
+        assert.isDefined(returnObj.headers['Content-Type']);
+        assert.isDefined(returnObj.headers['Accept']);
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.1/mock:1.0.0");
+        returnObj.proxy.should.equal("http://andrea.rizzini:9999");
+
+    });
+});
+
+describe('MasterCardAPI test ErrorParsing', function () {
     it('test APIException parsingObject', function () {
         var errorData = {
             "Errors": {
