@@ -50,30 +50,30 @@ describe('lostStolen', function() {
     });
 
 
-    it('send valid request with proxy', function(done){
+    // it('send valid request with proxy', function(done){
         
-        MasterCardAPI.setProxy("http://127.0.0.1:9999");
+    //     MasterCardAPI.setProxy("http://127.0.0.1:9999");
 
-        var request = {
-            "AccountInquiry": {
-                "AccountNumber": "5343434343434343"
-            }
-        };
+    //     var request = {
+    //         "AccountInquiry": {
+    //             "AccountNumber": "5343434343434343"
+    //         }
+    //     };
 
-        MasterCardAPI.execute({
-            operationConfig: operationConfig,
-            operationMetaData: operationMetaData,
-            params: request
-        },
-        function (error, data) {
-            data.Account.Status.should.equal(true);
-            data.Account.Listed.should.equal(true);
-            data.Account.ReasonCode.should.equal("S");
-            data.Account.Reason.should.equal("STOLEN");
-            done();
-        });
+    //     MasterCardAPI.execute({
+    //         operationConfig: operationConfig,
+    //         operationMetaData: operationMetaData,
+    //         params: request
+    //     },
+    //     function (error, data) {
+    //         data.Account.Status.should.equal(true);
+    //         data.Account.Listed.should.equal(true);
+    //         data.Account.ReasonCode.should.equal("S");
+    //         data.Account.Reason.should.equal("STOLEN");
+    //         done();
+    //     });
 
-    });
+    // });
 
     it('send valid request', function(done){
 
