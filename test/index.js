@@ -8,6 +8,7 @@ var Errors = require('../lib/error');
 
 // Imports for Test
 var should = require('should');
+var assert = require('chai').assert;
 
 describe('MasterCardAPI before init', function () {
     it('execute with no init returns error in callback', function () {
@@ -20,6 +21,34 @@ describe('MasterCardAPI before init', function () {
     });
 
 });
+
+describe('MasterCardAPI test setting proxy config and clear', function() {
+
+
+    after(function() {
+        MasterCardAPI.setProxy(null);
+    })
+
+
+    it('test setting proxy via contructor', function () {
+        
+        MasterCardAPI.init({
+            sandbox: true,
+            authentication: {},
+            proxy: "http://127.0.0.1:9999"
+        });
+
+        MasterCardAPI.getProxy().should.equal("http://127.0.0.1:9999");
+
+    });
+
+    it('test setting proxy via method', function () {
+        MasterCardAPI.setProxy("http://192.168.0.1:10000");
+        MasterCardAPI.getProxy().should.equal("http://192.168.0.1:10000");
+
+    });
+});
+
 
 
 describe('MasterCardAPI check ResourceConfig singleton', function () {
@@ -79,6 +108,15 @@ describe('MasterCardAPI check environments', function () {
         replacedUri.href.should.equal("https://sandbox.api.mastercard.com/api/user/333/moneysend?Format=JSON");
     });
 
+    it('sandbox:false and isJsonNative', function () {
+        MasterCardAPI.getRegisteredResourceConfigCount().should.equal(1);
+        MasterCardAPI.init({
+            sandbox: false,
+            authentication: {}
+        });
+        var replacedUri = MasterCardAPI.getUri([], new OperationConfig("/api/#env/user/333/moneysend", "create", [], []), new OperationMetaData("1.0.0", ResourceConfig.getHost(), ResourceConfig.getContext(), true));
+        replacedUri.href.should.equal("https://api.mastercard.com/api/user/333/moneysend");
+    });
 
     it('sandbox:false', function () {
         MasterCardAPI.getRegisteredResourceConfigCount().should.equal(1);
@@ -224,9 +262,19 @@ describe('MasterCardAPI', function () {
         var replacedUri = MasterCardAPI.getUri(params, new OperationConfig("/api/user/{user_id}", "create", [], []), new OperationMetaData("1.0.0", "https://api.mastercard.com"));
         replacedUri.href.should.equal("https://api.mastercard.com/api/user/333?Format=JSON");
         params.length.should.equal(0);
+        
+        
     });
 
-    it('test _getRequestOptions with header parameter ', function () {
+});
+
+describe('MasterCardAPI getRequestOptions', function () {
+
+    afterEach(function () {
+        MasterCardAPI.setProxy(null);
+    })
+
+    it('test _getRequestOptions GET with header parameter ', function () {
         var headerParam = new Array();
         headerParam['version'] = "1";
         headerParam['user_id'] = "333";
@@ -237,26 +285,83 @@ describe('MasterCardAPI', function () {
         var uri = "/api/v1/user/333/aaa?Format=JSON";
         var authHeader = "blablablablablabla";
 
-        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, authHeader, headerParam, new OperationMetaData("1.0.0", null));
+        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, null, authHeader, headerParam, new OperationMetaData("mock:1.0.0", null));
 
         returnObj.headers['version'].should.equal("1");
         returnObj.headers['user_id'].should.equal("333");
         returnObj.headers['partner_id'].should.equal("5465987412563");
+        
+        assert.isUndefined(returnObj.headers['Content-Type']);
+        assert.isDefined(returnObj.headers['Accept']);
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.1/mock:1.0.0");
 
     });
     
+    
+    it('test _getRequestOptions POST with header parameter ', function () {
+        var headerParam = new Array();
+        headerParam['version'] = "1";
+        headerParam['user_id'] = "333";
+        headerParam['partner_id'] = "5465987412563";
+
+        //httpMethod, uri, authHeader, headerParam
+        var httpMethod = "GET";
+        var uri = "/api/v1/user/333/aaa?Format=JSON";
+        var authHeader = "blablablablablabla";
+
+        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, "{}", authHeader, headerParam, new OperationMetaData("mock:1.0.0", null));
+
+        returnObj.headers['version'].should.equal("1");
+        returnObj.headers['user_id'].should.equal("333");
+        returnObj.headers['partner_id'].should.equal("5465987412563");
+        
+        assert.isDefined(returnObj.headers['Content-Type']);
+        assert.isDefined(returnObj.headers['Accept']);
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.1/mock:1.0.0");
+
+    });
+
+    it('test _getRequestOptions POST with proxy ', function () {
+
+        MasterCardAPI.setProxy("http://andrea.rizzini:9999");
+
+        var headerParam = new Array();
+        headerParam['version'] = "1";
+        headerParam['user_id'] = "333";
+        headerParam['partner_id'] = "5465987412563";
+
+        //httpMethod, uri, authHeader, headerParam
+        var httpMethod = "GET";
+        var uri = "/api/v1/user/333/aaa?Format=JSON";
+        var authHeader = "blablablablablabla";
+
+        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, "{}", authHeader, headerParam, new OperationMetaData("mock:1.0.0", null));
+
+        returnObj.headers['version'].should.equal("1");
+        returnObj.headers['user_id'].should.equal("333");
+        returnObj.headers['partner_id'].should.equal("5465987412563");
+        
+        assert.isDefined(returnObj.headers['Content-Type']);
+        assert.isDefined(returnObj.headers['Accept']);
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.1/mock:1.0.0");
+        returnObj.proxy.should.equal("http://andrea.rizzini:9999");
+
+    });
+});
+
+describe('MasterCardAPI test ErrorParsing', function () {
     it('test APIException parsingObject', function () {
         var errorData = {
             "Errors": {
                 "Error": {
-                    "Source":"System",
-                    "ReasonCode":"METHOD_NOT_ALLOWED",
-                    "Description":"Method not Allowed",
-                    "Recoverable":"false"
+                    "Source": "System",
+                    "ReasonCode": "METHOD_NOT_ALLOWED",
+                    "Description": "Method not Allowed",
+                    "Recoverable": "false"
                 }
             }
         };
-        
+
         var error = new Errors.APIError("test message", errorData, 500);
         var message = error.getMessage();
         message.should.equal("Method not Allowed");
@@ -264,22 +369,22 @@ describe('MasterCardAPI', function () {
         reasonCode.should.equal("METHOD_NOT_ALLOWED");
         var source = error.getSource();
         source.should.equal("System");
-        
-        
+
+
     });
-    
+
     it('test APIException parsingObject case-insensitive', function () {
         var errorData = {
             "errors": {
                 "error": {
-                    "source":"System",
-                    "reasoncode":"METHOD_NOT_ALLOWED",
-                    "description":"Method not Allowed",
-                    "recoverable":"false"
+                    "source": "System",
+                    "reasoncode": "METHOD_NOT_ALLOWED",
+                    "description": "Method not Allowed",
+                    "recoverable": "false"
                 }
             }
         };
-        
+
         var error = new Errors.APIError("test message", errorData, 500);
         var message = error.getMessage();
         message.should.equal("Method not Allowed");
@@ -287,66 +392,66 @@ describe('MasterCardAPI', function () {
         reasonCode.should.equal("METHOD_NOT_ALLOWED");
         var source = error.getSource();
         source.should.equal("System");
-        
-        
+
+
     });
-    
+
     it('test APIException parsingObject with an error list', function () {
-        
+
         var errorData = {
             "Errors": {
                 "Error": [{
-                    "Source":"System",
-                    "ReasonCode":"METHOD_NOT_ALLOWED",
-                    "Description":"Method not Allowed",
-                    "Recoverable":"false"
-                }]
+                        "Source": "System",
+                        "ReasonCode": "METHOD_NOT_ALLOWED",
+                        "Description": "Method not Allowed",
+                        "Recoverable": "false"
+                    }]
             }
         };
-       
-        
-       var error = new Errors.APIError("test message", errorData, 500);
-       var message = error.getMessage();
-       message.should.equal("Method not Allowed");
-       var reasonCode = error.getReasonCode();
-       reasonCode.should.equal("METHOD_NOT_ALLOWED");
-       var source = error.getSource();
-       source.should.equal("System");
-        
-        
+
+
+        var error = new Errors.APIError("test message", errorData, 500);
+        var message = error.getMessage();
+        message.should.equal("Method not Allowed");
+        var reasonCode = error.getReasonCode();
+        reasonCode.should.equal("METHOD_NOT_ALLOWED");
+        var source = error.getSource();
+        source.should.equal("System");
+
+
     });
-    
-    
-        it('test APIException parsingObject with a json native error', function () {
-        
+
+
+    it('test APIException parsingObject with a json native error', function () {
+
         var errorData = {
             "errors": [
                 {
-                 "source":"OpenAPIClientId",
-                 "reasonCode":"AUTHORIZATION_FAILED",
-                 "key":"050007",
-                 "description":"Unauthorized Access",
-                 "recoverable":false,
-                 "requestId":null,
-                 "details":{
-                     "details":[
-                         {"name":"ErrorDetailCode","value":"050007"}
-                     ]
-                 }
+                    "source": "OpenAPIClientId",
+                    "reasonCode": "AUTHORIZATION_FAILED",
+                    "key": "050007",
+                    "description": "Unauthorized Access",
+                    "recoverable": false,
+                    "requestId": null,
+                    "details": {
+                        "details": [
+                            {"name": "ErrorDetailCode", "value": "050007"}
+                        ]
+                    }
                 }
             ]
         };
-       
-        
-       var error = new Errors.APIError("test message", errorData, 500);
-       var message = error.getMessage();
-       message.should.equal("Unauthorized Access");
-       var reasonCode = error.getReasonCode();
-       reasonCode.should.equal("AUTHORIZATION_FAILED");
-       var source = error.getSource();
-       source.should.equal("OpenAPIClientId");
-        
-        
+
+
+        var error = new Errors.APIError("test message", errorData, 500);
+        var message = error.getMessage();
+        message.should.equal("Unauthorized Access");
+        var reasonCode = error.getReasonCode();
+        reasonCode.should.equal("AUTHORIZATION_FAILED");
+        var source = error.getSource();
+        source.should.equal("OpenAPIClientId");
+
+
     });
 
 });
