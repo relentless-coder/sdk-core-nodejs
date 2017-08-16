@@ -299,7 +299,7 @@ function _checkState() {
  * @return {Object} Returns a URI object needed for a HTTP request
  */
 function _getURI(params, operationConfig, operationMetaData) {
-    var uri = uri = operationMetaData.host
+    var uri = operationMetaData.host
 
     var resourcePath = operationConfig.path;
     

@@ -62,7 +62,7 @@ var _getOperationConfig = function(operationUUID) {
 };
 
 var _getOperationMetaData = function() {
-    return new MasterCardAPI.OperationMetaData(SdkConfig.getVersion(), SdkConfig.getHost());
+    return new MasterCardAPI.OperationMetaData(SdkConfig.getVersion(), SdkConfig.getHost(), "", true);
 };
 
     
