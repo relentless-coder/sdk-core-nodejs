@@ -1,6 +1,6 @@
 {
   "name": "mastercard-api-core",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Core functionality for MasterCard API",
   "main": "index.js",
   "scripts": {
