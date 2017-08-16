@@ -9,12 +9,21 @@ var mockAuthentication = require("./mock/mock-authentication");
 var should = require('should');
 var assert = require('assert');
 
-describe('Post', function () {
+var clientId = "L5BsiPgaF-O3qA36znUATgQXwJB6MRoMSdhjd7wt50c97279!50596e52466e3966546d434b7354584c4975693238513d3d";
+var p12Path = "./keystore/mcapi_sandbox_key.p12";
+var alias = "test";
+var password = "password";
+
+describe('test Post', function () {
 
     before(function() {
+        
+        var authentication = new MasterCardAPI.OAuth(clientId, p12Path, alias, password);
+        
         MasterCardAPI.testInit({
             sandbox: true,
-            authentication: mockAuthentication
+            debug:true,
+            authentication: authentication
         });
     });  
     
