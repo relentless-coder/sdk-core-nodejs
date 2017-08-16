@@ -14,6 +14,6 @@ describe('constants', function() {
     });
 
     it('getCoreVersion', function() {
-       constants.getCoreVersion().should.equal("mastercard-api-core(nodejs):1.4.3") 
+       constants.getCoreVersion().should.equal("mastercard-api-core(nodejs):1.4.4") 
     });
 });
