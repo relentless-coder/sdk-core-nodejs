@@ -305,7 +305,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         headerParam['partner_id'] = "5465987412563";
 
         //httpMethod, uri, authHeader, headerParam
-        var httpMethod = "GET";
+        var httpMethod = "POST";
         var uri = "/api/v1/user/333/aaa?Format=JSON";
         var authHeader = "blablablablablabla";
 
@@ -331,7 +331,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         headerParam['partner_id'] = "5465987412563";
 
         //httpMethod, uri, authHeader, headerParam
-        var httpMethod = "GET";
+        var httpMethod = "POST";
         var uri = "/api/v1/user/333/aaa?Format=JSON";
         var authHeader = "blablablablablabla";
 
