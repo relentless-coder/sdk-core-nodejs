@@ -88,7 +88,7 @@ describe('OAuth', function() {
 
         var signature = oauth.sign(uri, httpMethod, body);
 
-        signature.should.equal("\"OAuth oauth_body_hash=\"udgDg+hDUuKNSliLHbL1PeZLCWo=\",oauth_consumer_key=\"abc\",oauth_nonce=\"12345678\",oauth_signature=\"dBUpv1WZ1o6TPfJK4EgS5UTfRbgozYivLu%2BbgX0I29yH7os04WlZiyf4gfzD4HrLclsSSkra%2FROS6OGP6PsuQkzkxg17Ib7lAJTOzKzUj3KQQA5fcxEjl9KJO55OPX9hkr%2BY65N6Q9QWcXDo5OVQunBW8DERxLxgxjwf6OZ%2BoRPf35UunmhZOK8Siy8E7bkS1JzO79TVFCI7NEMlqZLPGXCb7i72HRBrqMrTfQBhO8Hiql4yn%2FjSKmDzuaKkS8sGlQizc52NBUKcW1rY7I8sKzEBlNpqLYlhq6t1s%2Bu9qPvn2p5sFKaQCnBVogc1ijMeikyINOCPlIGsjeuIpMjodg%3D%3D\",oauth_signature_method=\"RSA-SHA1\",oauth_timestamp=\"123\",oauth_version=\"1.0\"");
+        signature.should.equal("OAuth oauth_body_hash=\"udgDg+hDUuKNSliLHbL1PeZLCWo=\",oauth_consumer_key=\"abc\",oauth_nonce=\"12345678\",oauth_signature=\"dBUpv1WZ1o6TPfJK4EgS5UTfRbgozYivLu%2BbgX0I29yH7os04WlZiyf4gfzD4HrLclsSSkra%2FROS6OGP6PsuQkzkxg17Ib7lAJTOzKzUj3KQQA5fcxEjl9KJO55OPX9hkr%2BY65N6Q9QWcXDo5OVQunBW8DERxLxgxjwf6OZ%2BoRPf35UunmhZOK8Siy8E7bkS1JzO79TVFCI7NEMlqZLPGXCb7i72HRBrqMrTfQBhO8Hiql4yn%2FjSKmDzuaKkS8sGlQizc52NBUKcW1rY7I8sKzEBlNpqLYlhq6t1s%2Bu9qPvn2p5sFKaQCnBVogc1ijMeikyINOCPlIGsjeuIpMjodg%3D%3D\",oauth_signature_method=\"RSA-SHA1\",oauth_timestamp=\"123\",oauth_version=\"1.0\"");
     });
     
     
@@ -111,7 +111,7 @@ describe('OAuth', function() {
 
         var signature = oauth.sign(uri, httpMethod, body);
 
-        signature.should.equal("\"OAuth oauth_consumer_key=\"abc\",oauth_nonce=\"12345678\",oauth_signature=\"p7PVg6JAdI6OKYp0%2FMU4NhRKeJutJ%2Fjtc36FBvhScHsIcWgT4gbBP6QJAGysM0oXmeEf7NdXHY775ja47xIZpASSXcBIahPK2HpE7eGlfle8KbDPDnPSWW795gRSgIk05TRC0PS%2FCn%2FsFgl5EeQblICCtDkHlJbhvwOsQPsOcuKAd96wpDur65eHbDlTUK0MXcTalW%2FqDxtJHM4quvXPKEIqviUGC2fVeLtOYW82S7dG47vqVrZpiK7FG8Z0bSLy8%2BPW76UJvQz%2Fmu8XhUDOI1elvRZFYCPnS8CZGtAUhS57WxXhh%2BPHx0mQkIvIHWssRICtK0YzafyquF8kRp%2FP2A%3D%3D\",oauth_signature_method=\"RSA-SHA1\",oauth_timestamp=\"123\",oauth_version=\"1.0\"");
+        signature.should.equal("OAuth oauth_consumer_key=\"abc\",oauth_nonce=\"12345678\",oauth_signature=\"p7PVg6JAdI6OKYp0%2FMU4NhRKeJutJ%2Fjtc36FBvhScHsIcWgT4gbBP6QJAGysM0oXmeEf7NdXHY775ja47xIZpASSXcBIahPK2HpE7eGlfle8KbDPDnPSWW795gRSgIk05TRC0PS%2FCn%2FsFgl5EeQblICCtDkHlJbhvwOsQPsOcuKAd96wpDur65eHbDlTUK0MXcTalW%2FqDxtJHM4quvXPKEIqviUGC2fVeLtOYW82S7dG47vqVrZpiK7FG8Z0bSLy8%2BPW76UJvQz%2Fmu8XhUDOI1elvRZFYCPnS8CZGtAUhS57WxXhh%2BPHx0mQkIvIHWssRICtK0YzafyquF8kRp%2FP2A%3D%3D\",oauth_signature_method=\"RSA-SHA1\",oauth_timestamp=\"123\",oauth_version=\"1.0\"");
     });
 
 });
