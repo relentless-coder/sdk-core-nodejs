@@ -156,7 +156,7 @@ MasterCardAPI.execute = function (opts, callback) {
         uri = _getURI(params, operationConfig, operationMetaData);
         httpMethod = _getHttpMethod(operationConfig.action);
         
-        var body = _isEmpty(params) === false ? JSON.stringify(params) : null;
+        var body = _isEmpty(params) === false ? JSON.stringify(params) : "";
         var authHeader = authentication.sign(uri, httpMethod, body)
         
         var requestOptions = _getRequestOptions(httpMethod, uri, body, authHeader, headerParams, operationMetaData);
@@ -459,7 +459,7 @@ function _getRequestOptions(httpMethod, uri, body, authHeader, headerParam, oper
         };
 
     if (httpMethod !== "GET" && httpMethod !== "DELETE" && httpMethod !== "HEAD") {
-        returnObj["body"] = body ? body : "";
+        returnObj["body"] = body;
         returnObj.headers["Content-Type"] = "application/json; charset=utf-8";
     }
     //arizzini: addding the proxy info
