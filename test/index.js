@@ -293,7 +293,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         
         assert.isUndefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.5/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.7/mock:1.0.0");
 
     });
     
@@ -317,7 +317,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         
         assert.isDefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.5/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.7/mock:1.0.0");
 
     });
 
@@ -343,7 +343,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         
         assert.isDefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.5/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.7/mock:1.0.0");
         returnObj.proxy.should.equal("http://andrea.rizzini:9999");
 
     });
