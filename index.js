@@ -458,8 +458,8 @@ function _getRequestOptions(httpMethod, uri, body, authHeader, headerParam, oper
             headers: headersDict
         };
 
-    if (body) {
-        returnObj["body"] = body;
+    if (httpMethod !== "GET" && httpMethod !== "DELETE" && httpMethod !== "HEAD") {
+        returnObj["body"] = body ? body : "";
         returnObj.headers["Content-Type"] = "application/json; charset=utf-8";
     }
     //arizzini: addding the proxy info

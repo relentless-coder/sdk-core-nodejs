@@ -293,7 +293,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         
         assert.isUndefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.4/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.5/mock:1.0.0");
 
     });
     
@@ -305,7 +305,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         headerParam['partner_id'] = "5465987412563";
 
         //httpMethod, uri, authHeader, headerParam
-        var httpMethod = "GET";
+        var httpMethod = "POST";
         var uri = "/api/v1/user/333/aaa?Format=JSON";
         var authHeader = "blablablablablabla";
 
@@ -317,7 +317,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         
         assert.isDefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.4/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.5/mock:1.0.0");
 
     });
 
@@ -331,7 +331,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         headerParam['partner_id'] = "5465987412563";
 
         //httpMethod, uri, authHeader, headerParam
-        var httpMethod = "GET";
+        var httpMethod = "POST";
         var uri = "/api/v1/user/333/aaa?Format=JSON";
         var authHeader = "blablablablablabla";
 
@@ -343,7 +343,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         
         assert.isDefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.4/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.5/mock:1.0.0");
         returnObj.proxy.should.equal("http://andrea.rizzini:9999");
 
     });
