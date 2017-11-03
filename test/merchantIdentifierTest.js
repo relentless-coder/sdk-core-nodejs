@@ -20,32 +20,32 @@ var password = "password";
 describe('test MerchantIdentifier', function() {
     
     
-   it('test merchant-identifier.MICROSOFT', function(done) {
+//    it('test merchant-identifier.MICROSOFT', function(done) {
 
-       var authentication = new MasterCardAPI.OAuth(clientId, p12Path, alias, password);
+//        var authentication = new MasterCardAPI.OAuth(clientId, p12Path, alias, password);
 
-       MasterCardAPI.init({
-           sandbox: true,
-           debug: false,
-           authentication: authentication
-       });
+//        MasterCardAPI.init({
+//            sandbox: true,
+//            debug: false,
+//            authentication: authentication
+//        });
        
-       var requestData = {
-           "MerchantId": "MICROSOFT",
-           "Type": "FuzzyMatch"
-       };
+//        var requestData = {
+//            "MerchantId": "MICROSOFT",
+//            "Type": "FuzzyMatch"
+//        };
 
-       MerchantIdentifier.query(requestData
-       , function (error, data) {
-           if (error) {
-               console.log(error);
-               throw error;
-           }
+//        MerchantIdentifier.query(requestData
+//        , function (error, data) {
+//            if (error) {
+//                console.log(error);
+//                throw error;
+//            }
 
-           data.MerchantIds.Message.should.equal("7 merchants found.");
-           done();
-       });
-   });
+//            data.MerchantIds.Message.should.equal("7 merchants found.");
+//            done();
+//        });
+//    });
     
     
     
