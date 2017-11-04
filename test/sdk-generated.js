@@ -23,7 +23,6 @@ describe('test Post', function () {
         MasterCardAPI.testInit({
             sandbox: true,
             debug:true,
-            authentication: authentication
         });
     });  
     
