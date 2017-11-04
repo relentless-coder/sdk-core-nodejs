@@ -147,30 +147,23 @@ MasterCardAPI.execute = function (opts, callback) {
         // Check SDK has been correctly initialized
         _checkState();
 
+  
         var operationConfig = opts.operationConfig;
         var operationMetaData = opts.operationMetaData;
         var params = opts.params;
-        var headerParams = utils.subMap(params, operationConfig.headerParams);
-        var uri, httpMethod;
-
-        uri = _getURI(params, operationConfig, operationMetaData);
-        httpMethod = _getHttpMethod(operationConfig.action);
         
-        var body = _isEmpty(params) === false ? JSON.stringify(params) : "";
-        var authHeader = authentication.sign(uri, httpMethod, body)
-        
-        var requestOptions = _getRequestOptions(httpMethod, uri, body, authHeader, headerParams, operationMetaData);
+        var requestOptions = _getRequestOptions(params, operationConfig, operationMetaData);
         
         if (debug) {
             console.log( "---- Request ----");
             console.log( "URL");
-            console.log( httpMethod+"="+uri.href);
+            console.log( requestOptions.method+"="+requestOptions.url);
             console.log( "");
             console.log( "Headers");
             console.log( JSON.stringify(requestOptions.headers) );
             console.log( "");
             console.log( "Body" );
-            console.log( body );
+            console.log( requestOptions.body );
             console.log( "------------------");
             console.log( "" );
 
@@ -438,13 +431,27 @@ var _appendQueryString = function(uri, key, value) {
  *
  * @returns request options map
  */
-function _getRequestOptions(httpMethod, uri, body, authHeader, headerParam, operationMetaData) {
+function _getRequestOptions(params, operationConfig, operationMetaData ) {
+
+    
+    var headerParam = utils.subMap(params, operationConfig.headerParams);
+    var uri, httpMethod;
+
+    uri = _getURI(params, operationConfig, operationMetaData);
+    httpMethod = _getHttpMethod(operationConfig.action);
+    
+    var body = _isEmpty(params) === false ? JSON.stringify(params) : "";
 
     var headersDict = {
-             "Accept": "application/json; charset=utf-8",
-             "Authorization": authHeader,
-             "User-Agent": constants.getCoreVersion()+"/" + operationMetaData.version
+        "Accept": "application/json; charset=utf-8",
+        "User-Agent": constants.getCoreVersion()+"/" + operationMetaData.version
      };
+
+    if (authentication && (typeof authentication.sign === 'function')) {
+        var authHeader = authentication.sign(uri, httpMethod, body)
+        headersDict["Authorization"] = authHeader
+    }
+
 
     // arizzini: need to add the additional headers
     for (var key in headerParam) {
@@ -533,8 +540,8 @@ if (typeof global.it === 'function') {
         environment = constants.Environment.SANDBOX;
     }
     
-    MasterCardAPI.getRequestOptions = function (httpMethod, uri, body, authHeader, headerParam, operationMetaData) {
-        return _getRequestOptions(httpMethod, uri, body,authHeader, headerParam, operationMetaData);
+    MasterCardAPI.getRequestOptions = function (params, operationConfig, operationMetaData) {
+        return _getRequestOptions(params, operationConfig, operationMetaData);
     };
     
     MasterCardAPI.testInit = function (opts) {
