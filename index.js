@@ -157,7 +157,7 @@ MasterCardAPI.execute = function (opts, callback) {
         if (debug) {
             console.log( "---- Request ----");
             console.log( "URL");
-            console.log( requestOptions.method+"="+requestOptions.url);
+            console.log( requestOptions.method+"="+requestOptions.uri);
             console.log( "");
             console.log( "Headers");
             console.log( JSON.stringify(requestOptions.headers) );
