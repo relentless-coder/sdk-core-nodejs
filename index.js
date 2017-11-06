@@ -157,7 +157,7 @@ MasterCardAPI.execute = function (opts, callback) {
         if (debug) {
             console.log( "---- Request ----");
             console.log( "URL");
-            console.log( requestOptions.method+"="+requestOptions.uri);
+            console.log( requestOptions.method+"="+requestOptions.uri.href);
             console.log( "");
             console.log( "Headers");
             console.log( JSON.stringify(requestOptions.headers) );
@@ -413,7 +413,7 @@ var _appendQueryString = function(uri, key, value) {
         uri += "&";
     }
 
-    uri += key + "=" + value;
+    uri += utils.uriRfc3986Encode(key) + "=" + utils.uriRfc3986Encode(value);
 
     return uri;
 };
@@ -437,38 +437,36 @@ function _getRequestOptions(params, operationConfig, operationMetaData ) {
     var headerParam = utils.subMap(params, operationConfig.headerParams);
     var uri, httpMethod;
 
+    var returnObj = {};
+    returnObj.headers = {};
+
+    returnObj["encoding"]= "utf8"
+
     uri = _getURI(params, operationConfig, operationMetaData);
+    returnObj["uri"] = uri;
+
     httpMethod = _getHttpMethod(operationConfig.action);
+    returnObj["method"] = httpMethod;
     
-    var body = _isEmpty(params) === false ? JSON.stringify(params) : "";
-
-    var headersDict = {
-        "Accept": "application/json; charset=utf-8",
-        "User-Agent": constants.getCoreVersion()+"/" + operationMetaData.version
-     };
-
-    if (authentication && (typeof authentication.sign === 'function')) {
-        var authHeader = authentication.sign(uri, httpMethod, body)
-        headersDict["Authorization"] = authHeader
-    }
-
-
-    // arizzini: need to add the additional headers
-    for (var key in headerParam) {
-        headersDict[key] = headerParam[key];
-    }
-
-    var returnObj = {
-            uri: uri,
-            method: httpMethod,
-            encoding: "utf8",
-            headers: headersDict
-        };
-
+    var body = _isEmpty(params) === false ? JSON.stringify(params) : null;
     if (httpMethod !== "GET" && httpMethod !== "DELETE" && httpMethod !== "HEAD") {
         returnObj["body"] = body;
         returnObj.headers["Content-Type"] = "application/json; charset=utf-8";
     }
+
+    returnObj.headers["Accept"] = "application/json; charset=utf-8",
+    returnObj.headers["User-Agent"] = constants.getCoreVersion()+"/" + operationMetaData.version
+
+    // arizzini: need to add the additional headers
+    for (var key in headerParam) {
+        returnObj.headers[key] = headerParam[key];
+    }
+
+    if (authentication && (typeof authentication.sign === 'function')) {
+        var authHeader = authentication.sign(uri, httpMethod, body)
+        returnObj.headers["Authorization"] = authHeader
+    }
+    
     //arizzini: addding the proxy info
     if (proxy) {
         returnObj["proxy"] = proxy;

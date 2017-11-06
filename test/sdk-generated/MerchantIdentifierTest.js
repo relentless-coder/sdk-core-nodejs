@@ -1,8 +1,8 @@
-var MasterCardAPI = require('../index');
-var Constants = require('../lib/constants');
-var OperationConfig = require('../lib/operation-config');
-var OperationMetaData = require('../lib/operation-metadata');
-var MerchantIdentifier = require('./sdk-generated/MerchantIdentifier');
+var MasterCardAPI = require('../../index');
+var Constants = require('../..//lib/constants');
+var OperationConfig = require('../../lib/operation-config');
+var OperationMetaData = require('../../lib/operation-metadata');
+var MerchantIdentifier = require('./MerchantIdentifier');
 
 // Imports for Test
 var should = require('should');
