@@ -442,8 +442,8 @@ function _getRequestOptions(params, operationConfig, operationMetaData ) {
     returnObj["encoding"]= "utf8"
 
     var contentType = "application/json; charset=utf-8";
-    if (operationMetaData.contantTypeOverride != null) {
-        contentType = operationMetaData.contantTypeOverride+"; charset=utf-8;";
+    if (operationMetaData.contentTypeOverride != null) {
+        contentType = operationMetaData.contentTypeOverride+"; charset=utf-8";
     }
 
     uri = _getURI(params, operationConfig, operationMetaData);
