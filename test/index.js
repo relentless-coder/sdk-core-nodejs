@@ -326,6 +326,37 @@ describe('MasterCardAPI getRequestOptions', function () {
         returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.11/mock:1.0.0");
 
     });
+    
+    it('test _getRequestOptions POST with ContentTypeOverride ', function () {
+
+        var opts = new Array();
+        opts['version'] = "1";
+        opts['user_id'] = "333";
+        opts['partner_id'] = "5465987412563";
+
+        //httpMethod, uri, authHeader, headerParam
+        var httpMethod = "POST";
+        var uri = "/api/v1/user/333/aaa?Format=JSON";
+        var authHeader = "blablablablablabla";
+
+        var operationConfig = new OperationConfig(uri, "create", [], ['version','user_id', 'partner_id']);
+        var operationMetadata = new OperationMetaData("mock:1.0.0", "https://sandbox.api.mastercard.com", "", true, "text/json");
+
+        var returnObj = MasterCardAPI.getRequestOptions(opts, operationConfig, operationMetadata);
+
+        returnObj.headers['version'].should.equal("1");
+        returnObj.headers['user_id'].should.equal("333");
+        returnObj.headers['partner_id'].should.equal("5465987412563");
+
+        assert.isDefined(returnObj.headers['Content-Type']);
+        returnObj.headers['Content-Type'].should.equal("text/json; charset=utf-8");
+        assert.isDefined(returnObj.headers['Accept']);
+        returnObj.headers['Accept'].should.equal("text/json; charset=utf-8");
+
+
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.11/mock:1.0.0");
+
+    });
 
     it('test _getRequestOptions POST with proxy ', function () {
 
@@ -356,6 +387,7 @@ describe('MasterCardAPI getRequestOptions', function () {
         returnObj.proxy.should.equal("http://andrea.rizzini:9999");
 
     });
+
 });
 
 describe('MasterCardAPI test ErrorParsing', function () {
