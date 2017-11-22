@@ -187,7 +187,7 @@ MasterCardAPI.execute = function (opts, callback) {
                 var statusCode = res.statusCode
                 if (debug) {
                     console.log( "---- Response ----");
-                    console.log( "Statis");
+                    console.log( "Status");
                     console.log( statusCode);
                     console.log( "");
                     console.log( "Headers");
@@ -439,8 +439,12 @@ function _getRequestOptions(params, operationConfig, operationMetaData ) {
 
     var returnObj = {};
     returnObj.headers = {};
-
     returnObj["encoding"]= "utf8"
+
+    var contentType = "application/json; charset=utf-8";
+    if (operationMetaData.contentTypeOverride != null) {
+        contentType = operationMetaData.contentTypeOverride+"; charset=utf-8";
+    }
 
     uri = _getURI(params, operationConfig, operationMetaData);
     returnObj["uri"] = uri;
@@ -451,10 +455,10 @@ function _getRequestOptions(params, operationConfig, operationMetaData ) {
     var body = _isEmpty(params) === false ? JSON.stringify(params) : null;
     if (httpMethod !== "GET" && httpMethod !== "DELETE" && httpMethod !== "HEAD") {
         returnObj["body"] = body;
-        returnObj.headers["Content-Type"] = "application/json; charset=utf-8";
+        returnObj.headers["Content-Type"] = contentType;
     }
 
-    returnObj.headers["Accept"] = "application/json; charset=utf-8",
+    returnObj.headers["Accept"] = contentType;
     returnObj.headers["User-Agent"] = constants.getCoreVersion()+"/" + operationMetaData.version
 
     // arizzini: need to add the additional headers
