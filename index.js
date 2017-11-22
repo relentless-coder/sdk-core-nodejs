@@ -187,7 +187,7 @@ MasterCardAPI.execute = function (opts, callback) {
                 var statusCode = res.statusCode
                 if (debug) {
                     console.log( "---- Response ----");
-                    console.log( "Statis");
+                    console.log( "Status");
                     console.log( statusCode);
                     console.log( "");
                     console.log( "Headers");
