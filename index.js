@@ -31,17 +31,17 @@
  * @class MasterCardAPI
  * @static
  */
-var MasterCardAPI = {};
+const MasterCardAPI = {};
 
 // Imports
-var mastercardError = require('./lib/error');
-var constants = require('./lib/constants');
-var oauth = require("./lib/security/oauth/oauth");
-var operationConfig = require("./lib/operation-config");
-var operationMetaData = require("./lib/operation-metadata");
-var utils = require("./lib/utils");
-var request = require('request');
-var url = require('url');
+const mastercardError = require('./lib/error');
+const constants = require('./lib/constants');
+const oauth = require("./lib/security/oauth/oauth");
+const operationConfig = require("./lib/operation-config");
+const operationMetaData = require("./lib/operation-metadata");
+const utils = require("./lib/utils");
+const request = require('request');
+const url = require('url');
 
 // Variables
 var authentication = null;
@@ -61,7 +61,7 @@ var environment = constants.Environment.SANDBOX;
  *  {Boolean} authentication - authentication object e.g. MasterCardAPI.OAuth
  */
 MasterCardAPI.init = function (opts) {
-    
+
 
     //arizzini: backward compatible
     if (utils.isSet(opts.sandbox)) {
@@ -75,10 +75,10 @@ MasterCardAPI.init = function (opts) {
     } else {
         environment = constants.Environment.SANDBOX;
     }
-    
+
     MasterCardAPI.setEnvironment(environment);
-    
-    
+
+
     if (utils.isSet(opts.debug)) {
         debug = opts.debug;
     } else {
@@ -147,28 +147,27 @@ MasterCardAPI.execute = function (opts, callback) {
         // Check SDK has been correctly initialized
         _checkState();
 
-  
+
         var operationConfig = opts.operationConfig;
         var operationMetaData = opts.operationMetaData;
         var params = opts.params;
-        
+
         var requestOptions = _getRequestOptions(params, operationConfig, operationMetaData);
-        
+
         if (debug) {
-            console.log( "---- Request ----");
-            console.log( "URL");
-            console.log( requestOptions.method+"="+requestOptions.uri.href);
-            console.log( "");
-            console.log( "Headers");
-            console.log( JSON.stringify(requestOptions.headers) );
-            console.log( "");
-            console.log( "Body" );
-            console.log( requestOptions.body );
-            console.log( "------------------");
-            console.log( "" );
+            console.log( `---- Request ----
+                                URL
+                  ${requestOptions.method+"="+requestOptions.uri.href}
+
+                              Headers
+                  ${ JSON.stringify(requestOptions.headers) }
+
+                              Body
+                        ${requestOptions.body} );
+                          ------------------`);
 
         }
-        
+
         request(requestOptions, function (err, res, body) {
 
             if (err) {
@@ -209,7 +208,7 @@ MasterCardAPI.execute = function (opts, callback) {
                     }
                     catch (e) {
                         console.error("Error parsing json response. Status: " + statusCode)
-                        
+
                     }
                     // NB: Don't want to call callback in catch above as if the callback function throws an error it
                     // will go back into the catch
@@ -257,7 +256,7 @@ function _checkState() {
     if (!initialized) {
         throw new mastercardError.SDKError('MasterCardAPI.init(opts) must be called');
     }
-     
+
     if (test === false)
     {
         if (!utils.isSet(authentication)) {
@@ -295,7 +294,7 @@ function _getURI(params, operationConfig, operationMetaData) {
     var uri = operationMetaData.host
 
     var resourcePath = operationConfig.path;
-    
+
     if (resourcePath.indexOf("#env") > 0) {
         //arizzini: we have found an envirment marker
         var tmpContext = "";
@@ -307,10 +306,10 @@ function _getURI(params, operationConfig, operationMetaData) {
         //double forward slash in the url.
         resourcePath = resourcePath.replace("//", "/");
     }
-    
+
     // Modify URI to point to the correct API path
     uri = uri + resourcePath;
-    
+
     // replace the path parameters
     uri = _replacePathParameters(uri, params);
 
@@ -341,7 +340,7 @@ function _getURI(params, operationConfig, operationMetaData) {
     if (operationMetaData.jsonNative == false) {
         uri = _appendMapToQueryString(uri, { Format: "JSON" });
     }
-    
+
     // Use node js 'url' module to create URI object
     return url.parse(uri);
 };
@@ -352,7 +351,7 @@ var _replacePathParameters = function(path, map)
 {
     var pathParameterRegex = /(\{.*?\})/g;
     var pathToReplace = path;
-    
+
     var match = pathParameterRegex.exec(path);
     while (match != null) {
 
@@ -375,7 +374,7 @@ var _replacePathParameters = function(path, map)
         // iterate to next
         match = pathParameterRegex.exec(path);
     }
-   
+
     return pathToReplace;
 
 };
@@ -433,7 +432,7 @@ var _appendQueryString = function(uri, key, value) {
  */
 function _getRequestOptions(params, operationConfig, operationMetaData ) {
 
-    
+
     var headerParam = utils.subMap(params, operationConfig.headerParams);
     var uri, httpMethod;
 
@@ -451,7 +450,7 @@ function _getRequestOptions(params, operationConfig, operationMetaData ) {
 
     httpMethod = _getHttpMethod(operationConfig.action);
     returnObj["method"] = httpMethod;
-    
+
     var body = _isEmpty(params) === false ? JSON.stringify(params) : null;
     if (httpMethod !== "GET" && httpMethod !== "DELETE" && httpMethod !== "HEAD") {
         returnObj["body"] = body;
@@ -470,7 +469,7 @@ function _getRequestOptions(params, operationConfig, operationMetaData ) {
         var authHeader = authentication.sign(uri, httpMethod, body)
         returnObj.headers["Authorization"] = authHeader
     }
-    
+
     //arizzini: addding the proxy info
     if (proxy) {
         returnObj["proxy"] = proxy;
@@ -526,33 +525,33 @@ MasterCardAPI.MasterCardError = mastercardError;
 if (typeof global.it === 'function') {
     // START EXPOSE PRIVATE FUNCTION FOR TESTING
     var port = process.env.JENKINS_PORT ? process.env.JENKINS_PORT : 8080;
-    
+
     MasterCardAPI.getUri = function(params, operationConfig, operationMetaData) {
         return _getURI(params, operationConfig, operationMetaData);
     };
-    
+
     MasterCardAPI.getRegisteredResourceConfigCount = function() {
         return Object.keys(registeredInstances).length;
     };
-    
+
     MasterCardAPI.clearResourceConfig = function() {
         registeredInstances = {};
     };
-    
+
     MasterCardAPI.reset = function() {
         environment = constants.Environment.SANDBOX;
     }
-    
+
     MasterCardAPI.getRequestOptions = function (params, operationConfig, operationMetaData) {
         return _getRequestOptions(params, operationConfig, operationMetaData);
     };
-    
+
     MasterCardAPI.testInit = function (opts) {
         test = true;
         sandbox = true;
         initialized = true;
         authentication = opts.authentication
-        
+
     };
 
     MasterCardAPI.getProxy = function() {
