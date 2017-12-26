@@ -3,3 +3,4 @@
 /coverage/
 /nodejs-server/node_modules/
 .idea
+package-lock\.json

@@ -275,17 +275,20 @@ describe('MasterCardAPI getRequestOptions', function () {
     })
 
     it('test _getRequestOptions GET with header parameter ', function () {
-        var headerParam = new Array();
-        headerParam['version'] = "1";
-        headerParam['user_id'] = "333";
-        headerParam['partner_id'] = "5465987412563";
+        var opts = new Array();
+        opts['version'] = "1";
+        opts['user_id'] = "333";
+        opts['partner_id'] = "5465987412563";
 
         //httpMethod, uri, authHeader, headerParam
         var httpMethod = "GET";
         var uri = "/api/v1/user/333/aaa?Format=JSON";
         var authHeader = "blablablablablabla";
 
-        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, null, authHeader, headerParam, new OperationMetaData("mock:1.0.0", null));
+        var operationConfig = new OperationConfig(uri, "query", [], ['version','user_id', 'partner_id']);
+        var operationMetadata = new OperationMetaData("mock:1.0.0", "https://sandbox.api.mastercard.com", "", true);
+
+        var returnObj = MasterCardAPI.getRequestOptions(opts, operationConfig, operationMetadata);
 
         returnObj.headers['version'].should.equal("1");
         returnObj.headers['user_id'].should.equal("333");
@@ -293,23 +296,26 @@ describe('MasterCardAPI getRequestOptions', function () {
         
         assert.isUndefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.4/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.12/mock:1.0.0");
 
     });
     
     
     it('test _getRequestOptions POST with header parameter ', function () {
-        var headerParam = new Array();
-        headerParam['version'] = "1";
-        headerParam['user_id'] = "333";
-        headerParam['partner_id'] = "5465987412563";
+        var opts = new Array();
+        opts['version'] = "1";
+        opts['user_id'] = "333";
+        opts['partner_id'] = "5465987412563";
 
         //httpMethod, uri, authHeader, headerParam
-        var httpMethod = "GET";
+        var httpMethod = "POST";
         var uri = "/api/v1/user/333/aaa?Format=JSON";
         var authHeader = "blablablablablabla";
 
-        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, "{}", authHeader, headerParam, new OperationMetaData("mock:1.0.0", null));
+        var operationConfig = new OperationConfig(uri, "create", [], ['version','user_id', 'partner_id']);
+        var operationMetadata = new OperationMetaData("mock:1.0.0", "https://sandbox.api.mastercard.com", "", true);
+
+        var returnObj = MasterCardAPI.getRequestOptions(opts, operationConfig, operationMetadata);
 
         returnObj.headers['version'].should.equal("1");
         returnObj.headers['user_id'].should.equal("333");
@@ -317,7 +323,38 @@ describe('MasterCardAPI getRequestOptions', function () {
         
         assert.isDefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.4/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.12/mock:1.0.0");
+
+    });
+    
+    it('test _getRequestOptions POST with ContentTypeOverride ', function () {
+
+        var opts = new Array();
+        opts['version'] = "1";
+        opts['user_id'] = "333";
+        opts['partner_id'] = "5465987412563";
+
+        //httpMethod, uri, authHeader, headerParam
+        var httpMethod = "POST";
+        var uri = "/api/v1/user/333/aaa?Format=JSON";
+        var authHeader = "blablablablablabla";
+
+        var operationConfig = new OperationConfig(uri, "create", [], ['version','user_id', 'partner_id']);
+        var operationMetadata = new OperationMetaData("mock:1.0.0", "https://sandbox.api.mastercard.com", "", true, "text/json");
+
+        var returnObj = MasterCardAPI.getRequestOptions(opts, operationConfig, operationMetadata);
+
+        returnObj.headers['version'].should.equal("1");
+        returnObj.headers['user_id'].should.equal("333");
+        returnObj.headers['partner_id'].should.equal("5465987412563");
+
+        assert.isDefined(returnObj.headers['Content-Type']);
+        returnObj.headers['Content-Type'].should.equal("text/json; charset=utf-8");
+        assert.isDefined(returnObj.headers['Accept']);
+        returnObj.headers['Accept'].should.equal("text/json; charset=utf-8");
+
+
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.12/mock:1.0.0");
 
     });
 
@@ -325,17 +362,20 @@ describe('MasterCardAPI getRequestOptions', function () {
 
         MasterCardAPI.setProxy("http://andrea.rizzini:9999");
 
-        var headerParam = new Array();
-        headerParam['version'] = "1";
-        headerParam['user_id'] = "333";
-        headerParam['partner_id'] = "5465987412563";
+        var opts = new Array();
+        opts['version'] = "1";
+        opts['user_id'] = "333";
+        opts['partner_id'] = "5465987412563";
 
         //httpMethod, uri, authHeader, headerParam
-        var httpMethod = "GET";
+        var httpMethod = "POST";
         var uri = "/api/v1/user/333/aaa?Format=JSON";
         var authHeader = "blablablablablabla";
 
-        var returnObj = MasterCardAPI.getRequestOptions(httpMethod, uri, "{}", authHeader, headerParam, new OperationMetaData("mock:1.0.0", null));
+        var operationConfig = new OperationConfig(uri, "create", [], ['version','user_id', 'partner_id']);
+        var operationMetadata = new OperationMetaData("mock:1.0.0", "https://sandbox.api.mastercard.com", "", true);
+
+        var returnObj = MasterCardAPI.getRequestOptions(opts, operationConfig, operationMetadata);
 
         returnObj.headers['version'].should.equal("1");
         returnObj.headers['user_id'].should.equal("333");
@@ -343,10 +383,11 @@ describe('MasterCardAPI getRequestOptions', function () {
         
         assert.isDefined(returnObj.headers['Content-Type']);
         assert.isDefined(returnObj.headers['Accept']);
-        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.4/mock:1.0.0");
+        returnObj.headers['User-Agent'].should.equal("mastercard-api-core(nodejs):1.4.12/mock:1.0.0");
         returnObj.proxy.should.equal("http://andrea.rizzini:9999");
 
     });
+
 });
 
 describe('MasterCardAPI test ErrorParsing', function () {
